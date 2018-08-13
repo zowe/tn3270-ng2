@@ -1,0 +1,77 @@
+
+
+<!-- 
+  This program and the accompanying materials are
+  made available under the terms of the Eclipse Public License v2.0 which accompanies
+  this distribution, and is available at https://www.eclipse.org/legal/epl-v20.html
+  
+  SPDX-License-Identifier: EPL-2.0
+  
+  Copyright Contributors to the Zowe Project.
+-->
+
+<div class="tn3270-parent" #terminalParent>
+  <button class="toggle-menu expand-menu" *ngIf="!showMenu" type="submit" (click)="toggleMenu(true)"></button>
+  <button class="toggle-menu contract-menu" *ngIf="showMenu" type="submit" (click)="toggleMenu(false)"></button>
+  <div *ngIf="showMenu" class="toolbar">
+  <div class="form-group row toolbar-row" style="width: 100%; height:40px">
+    <label class="col-sm-1 col-form-label">Host</label>
+    <div class="toolbar-input col-sm-2">
+      <input class="form-control" [disabled]="hasError" [(ngModel)]="host">
+    </div>
+    <label class="col-sm-1 col-form-label">Port</label>
+    <div class="toolbar-input col-sm-1">
+      <input type="number" class="form-control" [disabled]="hasError" [(ngModel)]="port">
+    </div>
+    <label class="col-sm-1 col-form-label">Type</label>
+    <div class="toolbar-input col-sm-2">
+      <select [(ngModel)]="securityType" [disabled]="hasError" class="form-control">
+        <option value="0">Telnet</option>
+        <option value="2">TLS</option>
+      </select>
+    </div>
+    <label class="col-sm-1 col-form-label">Mod</label>
+    <div class="toolbar-input col-sm-2">
+      <select [(ngModel)]="modType" (change)="modTypeChange($event.target.value)" [disabled]="hasError" class="form-control">
+        <option value="1">2 (24x80)</option>
+        <option value="2">3 (32x80)</option>
+        <option value="3">4 (43x80)</option>
+        <option value="4">5 (27x132)</option>
+        <option value="5">Dynamic</option>
+      </select>
+    </div>      
+    <div class="power-toggle">
+      <button type="submit" class="power-toggle-button btn btn-primary" [disabled]="hasError" (click)="toggleConnection()"></button>
+    </div>
+  </div>
+  <div class="form-group row toolbar-row" style="width: 100%; height:40px">
+    <label class="col-sm-1 col-form-label">Column</label>
+    <div class="toolbar-input col-sm-2">
+      <input type="number" [disabled]="!isDynamic || hasError" class="form-control" [(ngModel)]="column">
+    </div> 
+    <label class="col-sm-1 col-form-label">Row</label>
+    <div class="toolbar-input col-sm-1">
+      <input type="number" [disabled]="!isDynamic || hasError" class="form-control" [(ngModel)]="row">
+    </div>
+    <label class="col-sm-2 col-form-label">Codepage</label>
+    <div class="toolbar-input col-sm-4">
+      <select [(ngModel)]="selectedCodepage" [disabled]="hasError" class="form-control">
+        <option [ngValue]="i.name" *ngFor="let i of charsets">{{i.name}}</option>
+      </select>
+    </div>    
+  </div>
+  </div>
+  <div class="tn3270" [ngStyle]="terminalDivStyle" #terminal>
+  </div>  
+</div>
+
+<!-- 
+  This program and the accompanying materials are
+  made available under the terms of the Eclipse Public License v2.0 which accompanies
+  this distribution, and is available at https://www.eclipse.org/legal/epl-v20.html
+  
+  SPDX-License-Identifier: EPL-2.0
+  
+  Copyright Contributors to the Zowe Project.
+-->
+

@@ -1,0 +1,29 @@
+# This program and the accompanying materials are
+# made available under the terms of the Eclipse Public License v2.0 which accompanies
+# this distribution, and is available at https://www.eclipse.org/legal/epl-v20.html
+# 
+# SPDX-License-Identifier: EPL-2.0
+# 
+# Copyright Contributors to the Zowe Project.
+# Editor configuration, see http://editorconfig.org
+root = true
+
+[*]
+charset = utf-8
+indent_style = space
+indent_size = 2
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+[*.md]
+max_line_length = off
+trim_trailing_whitespace = false
+
+
+# This program and the accompanying materials are
+# made available under the terms of the Eclipse Public License v2.0 which accompanies
+# this distribution, and is available at https://www.eclipse.org/legal/epl-v20.html
+# 
+# SPDX-License-Identifier: EPL-2.0
+# 
+# Copyright Contributors to the Zowe Project.
