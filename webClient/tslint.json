@@ -1,0 +1,5 @@
+{
+  "extends": [
+    "../../zlux-app-manager/virtual-desktop/plugin-config/tslint.base.json"
+  ]
+}
