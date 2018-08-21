@@ -1,5 +1,5 @@
 {
-  "name": "com.rs.mvd.tn3270",
+  "name": "org.zowe.terminal.tn3270",
   "version": "0.9.0",
   "description": "A zLUX App implementing a TN3270 terminal emulator through web technologies.",
   "author": {
@@ -11,7 +11,7 @@
     "build": "webpack --progress --colors",
     "lint": "tslint -c tslint.json \"./**/*.ts\""
   },
-  "license": "private",
+  "license": "EPL-2.0",
   "dependencies": {},
   "devDependencies": {
     "@angular/animations": "~6.0.9",
