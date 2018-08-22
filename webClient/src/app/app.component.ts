@@ -38,7 +38,9 @@ export class AppComponent implements AfterViewInit {
   connectionSettings: any;
   hasError: boolean;
   isDynamic: boolean;
+  private lastRow: number;
   row: number;
+  private lastColumn: number;
   column: number;
   charsets: Array<any>;
   selectedCodepage: string;
@@ -63,16 +65,17 @@ export class AppComponent implements AfterViewInit {
           this.host = cs.host;
           this.port = cs.port;
           this.modType = ""+cs.deviceType;
-          if (cs.security && cs.security.type) this.securityType = ""+cs.security.type;
+          if (cs.security && cs.security.type){
+            this.securityType = ""+cs.security.type;
+          }
           if (this.modType === "5") {
             this.isDynamic = true;
-            this.row = cs.alternateHeight ? cs.alternativeHeight : 24;
-            this.column = cs.alternateWidth ? cs.alternativeWidth : 80;
+            this.row = cs.alternateHeight ? cs.alternateHeight : 24;
+            this.column = cs.alternateWidth ? cs.alternateWidth : 80;
           }
           this.connectionSettings = cs;
-        } else {
-          
         }
+        break;
       default:
         
       }
@@ -89,6 +92,8 @@ export class AppComponent implements AfterViewInit {
     if (!this.securityType) this.securityType = "0";
     if (!this.row) this.row = 24;
     if (!this.column) this.column = 80;
+    this.lastRow = this.row;
+    this.lastColumn = this.column;
     this.selectedCodepage = "International EBCDIC 1047";
   }
 
@@ -102,9 +107,7 @@ export class AppComponent implements AfterViewInit {
   }
 
   modTypeChange(value:string): void {
-    if (value === "5") {
-      this.isDynamic = true;
-    }
+    this.isDynamic = (value === "5");
   }
 
   ngAfterViewInit(): void {
@@ -213,6 +216,16 @@ export class AppComponent implements AfterViewInit {
         alternateWidth: this.column,
         charsetName: this.selectedCodepage
       });
+    }
+  }
+
+  validateScreenDimension(): void {
+    if ((this.row * this.column) > 16383) {
+      this.row = this.lastRow;
+      this.column = this.lastColumn;
+    } else {
+      this.lastRow = this.row;
+      this.lastColumn = this.column;
     }
   }
 
