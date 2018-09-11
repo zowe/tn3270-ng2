@@ -71,7 +71,7 @@ export class Terminal {
     const myHost = window.location.host;
     const protocol = window.location.protocol;
     const wsProtocol = (protocol === 'https:') ? 'wss:' : 'ws:';
-    connectionSettings.url = `${wsProtocol}//${myHost}${RocketMVD.uriBroker.serverRootUri('ZLUX/plugins/com.rs.terminalproxy/services/tn3270data')}`;
+    connectionSettings.url = `${wsProtocol}//${myHost}${ZoweZLUX.uriBroker.serverRootUri('ZLUX/plugins/com.rs.terminalproxy/services/tn3270data')}`;
     connectionSettings.connect = true;
     // logic for using dispatcher goes here
     // should be in Tn3270Service.js eventually
