@@ -6,7 +6,7 @@ SPDX-License-Identifier: EPL-2.0
 
 Copyright Contributors to the Zowe Project.
 # TN3270 App
-This an App that can run with the zLUX framework for the integration of the TN3270 terminal emulator web library built by Rocket Software. It requires an external terminal emulator library, which may be provided by Rocket Software, in order to use.
+This an App that presents a TN3270 emulator within the Zowe UI environment.
 
 
 This program and the accompanying materials are
