@@ -110,7 +110,7 @@ export class AppComponent implements AfterViewInit {
   ngAfterViewInit(): void {
     let log:ZLUX.ComponentLogger = this.log;
     log.info('START: Tn3270 ngAfterViewInit');
-    let dispatcher: ZLUX.Dispatcher = RocketMVD.dispatcher; 
+    let dispatcher: ZLUX.Dispatcher = ZoweZLUX.dispatcher; 
     log.info("JOE.Tn3270 app comp, dispatcher="+dispatcher);
     const terminalElement = this.terminalElementRef.nativeElement;
     const terminalParentElement = this.terminalParentElementRef.nativeElement;
@@ -219,7 +219,7 @@ export class AppComponent implements AfterViewInit {
 
   loadConfig(): Observable<ConfigServiceTerminalConfig> {
     this.log.warn("Config load is wrong and not abstracted");
-    return this.http.get(RocketMVD.uriBroker.pluginConfigForScopeUri(this.pluginDefinition.getBasePlugin(),'instance','sessions','_defaultTN3270.json'))
+    return this.http.get(ZoweZLUX.uriBroker.pluginConfigForScopeUri(this.pluginDefinition.getBasePlugin(),'instance','sessions','_defaultTN3270.json'))
       .map((res: Response) => res.json());
   }
 }
