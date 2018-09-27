@@ -9,7 +9,7 @@
 */
 
 import 'script-loader!./../lib/js/tn3270.js';
-import { AfterViewInit, OnDestroy, Component, ElementRef, Input, ViewChild, Inject } from '@angular/core';
+import { AfterViewInit, OnDestroy, Component, ElementRef, Input, ViewChild, Inject, Optional } from '@angular/core';
 import {Http, Response} from '@angular/http';
 import {Observable} from 'rxjs/Rx';
 import 'rxjs/add/operator/map';
@@ -71,7 +71,7 @@ class ErrorState {
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })
-export class AppComponent implements AfterViewInit {
+export class AppComponent implements AfterViewInit, MVDHosting.ViewportCloseHandler {
   @ViewChild('terminal')
   terminalElementRef: ElementRef;
   @ViewChild('terminalParent')
@@ -99,7 +99,7 @@ export class AppComponent implements AfterViewInit {
     @Inject(Angular2InjectionTokens.LOGGER) private log: ZLUX.ComponentLogger,
     @Inject(Angular2InjectionTokens.PLUGIN_DEFINITION) private pluginDefinition: ZLUX.ContainerPluginDefinition,
     @Inject(Angular2InjectionTokens.VIEWPORT_EVENTS) private viewportEvents: Angular2PluginViewportEvents,
-    @Inject(Angular2InjectionTokens.WINDOW_ACTIONS) private windowActions: Angular2PluginWindowActions,
+    @Optional() @Inject(Angular2InjectionTokens.WINDOW_ACTIONS) private windowActions: Angular2PluginWindowActions,
     @Inject(Angular2InjectionTokens.LAUNCH_METADATA) private launchMetadata: any,
   ) {   
     this.log.debug("Component Constructor");
@@ -139,11 +139,13 @@ export class AppComponent implements AfterViewInit {
   }
 
   ngOnInit(): void {
-    this.windowActions.registerCloseHandler(():Promise<void>=> {
-      return new Promise((resolve,reject)=> {
-        this.ngOnDestroy();
-        resolve();
-      });
+    this.viewportEvents.registerCloseHandler(this);
+  }
+
+  onViewportClosed(): Promise<void> {
+    return new Promise((resolve,reject)=> {
+      this.ngOnDestroy();
+      resolve();
     });
   }
 
@@ -160,26 +162,28 @@ export class AppComponent implements AfterViewInit {
     const terminalParentElement = this.terminalParentElementRef.nativeElement;
     this.terminal = new Terminal(terminalElement, terminalParentElement, this.http, this.pluginDefinition, this.log);
     this.viewportEvents.resized.subscribe(() => this.terminal.performResize());
-    this.terminal.contextMenuEmitter.subscribe( (info) => {
-      let screenContext:any = info.screenContext;
-      screenContext["sourcePluginID"] = this.pluginDefinition.getBasePlugin().getIdentifier();
-      log.info("app.comp subcribe lambda, dispatcher="+dispatcher);
-      let recognizers:any[] = dispatcher.getRecognizers(screenContext);
-      log.info("recoginzers "+recognizers);
-      let menuItems:ContextMenuItem[] = [];
-      for (let recognizer of recognizers){
-        let action = dispatcher.getAction(recognizer);
-        log.debug("JOE:recognizer="+JSON.stringify(recognizer)+" action="+action);
-        if (action){
-          let menuCallback = () => {
-            dispatcher.invokeAction(action,info.screenContext);
+    if (this.windowActions) {
+      this.terminal.contextMenuEmitter.subscribe( (info) => {
+        let screenContext:any = info.screenContext;
+        screenContext["sourcePluginID"] = this.pluginDefinition.getBasePlugin().getIdentifier();
+        log.info("app.comp subcribe lambda, dispatcher="+dispatcher);
+        let recognizers:any[] = dispatcher.getRecognizers(screenContext);
+        log.info("recoginzers "+recognizers);
+        let menuItems:ContextMenuItem[] = [];
+        for (let recognizer of recognizers){
+          let action = dispatcher.getAction(recognizer);
+          log.debug("JOE:recognizer="+JSON.stringify(recognizer)+" action="+action);
+          if (action){
+            let menuCallback = () => {
+              dispatcher.invokeAction(action,info.screenContext);
+            }
+            // menu items can also have children
+            menuItems.push({text: action.getDefaultName(), action: menuCallback});
           }
-          // menu items can also have children
-          menuItems.push({text: action.getDefaultName(), action: menuCallback});
         }
-      }
-      this.windowActions.spawnContextMenu(info.x, info.y, menuItems);
-    });
+        this.windowActions.spawnContextMenu(info.x, info.y, menuItems);
+      });
+    }
     this.terminal.wsErrorEmitter.subscribe((error: TerminalWebsocketError)=> this.onWSError(error));
     if (!this.connectionSettings) {
       this.loadConfig().subscribe((config: ConfigServiceTerminalConfig) => {
