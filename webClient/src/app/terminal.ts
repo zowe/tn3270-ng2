@@ -67,6 +67,9 @@ export class Terminal {
   ) { }
 
   connectToHost(connectionSettings: any) {
+    if (this.virtualScreen) {
+      return;
+    }
     const computedStyle = getComputedStyle(this.terminalElement, null);
     const width = parseInt(computedStyle.getPropertyValue('width'));
     const height = parseInt(computedStyle.getPropertyValue('height'));
@@ -107,6 +110,7 @@ export class Terminal {
     }
 
     const wsErrorCallback = (wsCode: number, wsReason: string, terminalMessage: string) => {
+      this.virtualScreen = null;
       this.wsErrorEmitter.next({code: wsCode, reason: wsReason, terminalMessage: terminalMessage});
     };
 
@@ -119,7 +123,7 @@ export class Terminal {
   }
 
   isConnected(): boolean {
-    return this.virtualScreen && this.virtualScreen.isConnected();
+    return this.virtualScreen;
   }
 
   close() {

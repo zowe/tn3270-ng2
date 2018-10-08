@@ -48,6 +48,14 @@ class ErrorState {
     this.stateArray.fill(null);
   }
 
+  //should it block connection
+  isStateBlocking(): boolean {
+    if (this.stateArray[ErrorType.host] || this.stateArray[ErrorType.port] || this.stateArray[ErrorType.dimension] ){
+      return true;
+    }
+    return false;
+  }
+
   getFirstError(): string|null {
     for (let i = 0; i < this.stateArray.length; i++) {
       if (this.stateArray[i]) {
@@ -84,6 +92,7 @@ export class AppComponent implements AfterViewInit {
   showMenu: boolean;
   private terminalHeightOffset: number = 0;
   private currentErrors: ErrorState = new ErrorState();
+  disableButton: boolean;
 
   constructor(
     private http: Http,
@@ -229,7 +238,13 @@ export class AppComponent implements AfterViewInit {
     let error = this.currentErrors.getFirstError();
 
     let hadError = this.errorMessage.length > 0;
-    this.errorMessage = error ? error : '';
+    if (error) {
+      this.errorMessage = error;
+      this.disableButton = this.currentErrors.isStateBlocking() ? true : false;
+    } else {
+      this.errorMessage = '';
+      this.disableButton = false;
+    }
 
     if ((error && !hadError) || (!error && hadError)) {
       let offset: number = error ? CONFIG_MENU_ROW_PX : -CONFIG_MENU_ROW_PX;
@@ -313,13 +328,25 @@ export class AppComponent implements AfterViewInit {
     return this.terminal.isConnected();
   }
 
+  get powerButtonColor(): string {
+    if (this.disableButton) {
+      return "#bf3030";
+    } else if (this.isConnected) {
+      return "#17da38";
+    } else {
+      return "#b9b9b9";
+    }
+  }
+
   validateScreenDimension(): void {
-    if ((this.row * this.column) > 16383) {
-      this.setError(ErrorType.dimension, 'Screen dimension above 16383, decrease row or column count');
-    } else if (this.row < 0 || !Number.isInteger(this.row)) {
+    if (this.row < 0 || !Number.isInteger(this.row)) {
       this.setError(ErrorType.dimension, 'Row number missing or invalid');
     } else if (this.column < 0 || !Number.isInteger(this.column)) {
       this.setError(ErrorType.dimension, 'Column number missing or invalid');
+    } else if ((this.row * this.column) > 16383) {
+      let rowMax = Math.ceil(16383/this.column);
+      let colMax = Math.ceil(16383/this.row);
+      this.setError(ErrorType.dimension, `Screen dimension above 16383, decrease row to below ${rowMax} or column to below ${colMax}`);
     } else if (this.errorMessage.length > 0) {
       this.clearError(ErrorType.dimension);
     }
