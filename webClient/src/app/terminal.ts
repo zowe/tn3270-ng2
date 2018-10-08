@@ -48,18 +48,23 @@ export class TerminalStateHelper {
   }
 }
 
+export type TerminalWebsocketError = {
+  code: number;
+  reason: string;
+  terminalMessage: string;
+}
+
 export class Terminal {
   virtualScreen: any;
-  contextMenuEmitter: Subject<any>;
+  contextMenuEmitter: Subject<any> = new Subject();
+  wsErrorEmitter: Subject<TerminalWebsocketError> = new Subject();
   constructor(
     private terminalElement: HTMLElement,
     private terminalParentElement: HTMLElement,
     public http: Http,
     public pluginDefinition: ZLUX.ContainerPluginDefinition,
     private log: ZLUX.ComponentLogger
-  ) {
-    this.contextMenuEmitter = new Subject();
-  }
+  ) { }
 
   connectToHost(connectionSettings: any) {
     const computedStyle = getComputedStyle(this.terminalElement, null);
@@ -101,12 +106,16 @@ export class Terminal {
       
     }
 
+    const wsErrorCallback = (wsCode: number, wsReason: string, terminalMessage: string) => {
+      this.wsErrorEmitter.next({code: wsCode, reason: wsReason, terminalMessage: terminalMessage});
+    };
 
     this.virtualScreen = start3270({parentDiv:this.terminalElement,
                                     width: width, height: height},
                                    connectionSettings,
                                    null,{contextCallback:contextCallback,
-                                         screenLoadedCallback: screenLoadedCallback});
+                                         screenLoadedCallback: screenLoadedCallback,
+                                         wsErrorCallback: wsErrorCallback});
   }
 
   isConnected(): boolean {
@@ -121,7 +130,9 @@ export class Terminal {
   }
 
   performResize() {
-    this.virtualScreen.handleContainerResizeFromUI(this.terminalElement, this.virtualScreen);
+    if (this.virtualScreen) {
+      this.virtualScreen.handleContainerResizeFromUI(this.terminalElement, this.virtualScreen);
+    }
   }
 }
 
