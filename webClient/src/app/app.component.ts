@@ -17,8 +17,54 @@ declare var TERMINAL_DEFAULT_CHARSETS: any;
 
 import { Angular2InjectionTokens, Angular2PluginWindowActions, Angular2PluginViewportEvents, ContextMenuItem } from 'pluginlib/inject-resources';
 
-import {Terminal} from './terminal';
+import { Terminal, TerminalWebsocketError} from './terminal';
 import {ConfigServiceTerminalConfig, TerminalConfig} from './terminal.config';
+
+const TOGGLE_MENU_BUTTON_PX = 16; //with padding
+const CONFIG_MENU_ROW_PX = 40;
+const CONFIG_MENU_PAD_PX = 4;
+const CONFIG_MENU_SIZE_PX = (CONFIG_MENU_ROW_PX*2)+CONFIG_MENU_PAD_PX; //40 per row, plus 2 px padding
+
+enum ErrorType {
+  host,
+  port,
+  config,
+  dimension,
+  websocket
+}
+
+class ErrorState {
+  private stateArray: Array<string|null> = new Array<string|null>();
+
+  set(type: ErrorType, message: string|null) {
+    this.stateArray[type] = message;
+  }
+
+  get(type:ErrorType): string|null {
+    return this.stateArray[type];
+  }
+
+  clear(): void {
+    this.stateArray.fill(null);
+  }
+
+  //should it block connection
+  isStateBlocking(): boolean {
+    if (this.stateArray[ErrorType.host] || this.stateArray[ErrorType.port] || this.stateArray[ErrorType.dimension] ){
+      return true;
+    }
+    return false;
+  }
+
+  getFirstError(): string|null {
+    for (let i = 0; i < this.stateArray.length; i++) {
+      if (this.stateArray[i]) {
+        return this.stateArray[i];
+      }
+    }
+    return null;
+  }
+}
 
 @Component({
   selector: 'com-rs-mvd-tn3270',
@@ -36,14 +82,17 @@ export class AppComponent implements AfterViewInit {
   securityType:string;
   modType: string;
   connectionSettings: any;
-  hasError: boolean;
+  errorMessage: string = '';
   isDynamic: boolean;
   row: number;
   column: number;
-  charsets: Array<any>;
-  selectedCodepage: string;
+  charsets: Array<any> = TERMINAL_DEFAULT_CHARSETS;
+  selectedCodepage: string = "International EBCDIC 1047";
   terminalDivStyle: any;
   showMenu: boolean;
+  private terminalHeightOffset: number = 0;
+  private currentErrors: ErrorState = new ErrorState();
+  disableButton: boolean;
 
   constructor(
     private http: Http,
@@ -63,33 +112,30 @@ export class AppComponent implements AfterViewInit {
           this.host = cs.host;
           this.port = cs.port;
           this.modType = ""+cs.deviceType;
-          if (cs.security && cs.security.type) this.securityType = ""+cs.security.type;
+          if (cs.security && cs.security.type){
+            this.securityType = ""+cs.security.type;
+          }
           if (this.modType === "5") {
             this.isDynamic = true;
-            this.row = cs.alternateHeight ? cs.alternativeHeight : 24;
-            this.column = cs.alternateWidth ? cs.alternativeWidth : 80;
+            this.row = cs.alternateHeight ? cs.alternateHeight : 24;
+            this.column = cs.alternateWidth ? cs.alternateWidth : 80;
           }
           this.connectionSettings = cs;
-        } else {
-          
         }
+        break;
       default:
         
       }
     }
-    //initializations
-    this.terminalDivStyle = {
-      top: `14px`,
-      height: `calc(100% - 14px)`
-    }    
-    this.charsets = TERMINAL_DEFAULT_CHARSETS;
+    this.adjustTerminal(TOGGLE_MENU_BUTTON_PX);
+
+    //defaulting initializations
     if (!this.host) this.host = "localhost";
     if (!this.port) this.port = 23;
     if (!this.modType) this.modType = "1";
     if (!this.securityType) this.securityType = "0";
     if (!this.row) this.row = 24;
     if (!this.column) this.column = 80;
-    this.selectedCodepage = "International EBCDIC 1047";
   }
 
   ngOnInit(): void {
@@ -102,9 +148,7 @@ export class AppComponent implements AfterViewInit {
   }
 
   modTypeChange(value:string): void {
-    if (value === "5") {
-      this.isDynamic = true;
-    }
+    this.isDynamic = (value === "5");
   }
 
   ngAfterViewInit(): void {
@@ -136,6 +180,7 @@ export class AppComponent implements AfterViewInit {
       }
       this.windowActions.spawnContextMenu(info.x, info.y, menuItems);
     });
+    this.terminal.wsErrorEmitter.subscribe((error: TerminalWebsocketError)=> this.onWSError(error));
     if (!this.connectionSettings) {
       this.loadConfig().subscribe((config: ConfigServiceTerminalConfig) => {
         this.host = config.contents.host;
@@ -145,6 +190,13 @@ export class AppComponent implements AfterViewInit {
           port: this.port
         }
         this.terminal.connectToHost(this.connectionSettings);
+      }, (error) => {
+        if (error.status && error.statusText) {
+          this.setError(ErrorType.config, `Config load status=${error.status}, text=${error.statusText}`);
+        } else {
+          this.log.warn(`Config load error=${error}`);
+          this.setError(ErrorType.config, `Unknown config load error. Check browser log`);
+        }
       });
     } else {
       this.terminal.connectToHost(this.connectionSettings);
@@ -156,16 +208,66 @@ export class AppComponent implements AfterViewInit {
     this.terminal.close();
   }
 
+  private onWSError(error: TerminalWebsocketError): void {
+    let message = "Terminal closed due to websocket error. Code="+error.code;
+    this.log.warn(message+", Reason="+error.reason);
+    this.setError(ErrorType.websocket, message);
+  }
+
+  private setError(type: ErrorType, message: string):void {
+    this.currentErrors.set(type, message);
+    this.refreshErrorBar();
+  }
+
+  private clearError(type: ErrorType):void {
+    let hadError = this.currentErrors.get(type);
+    this.currentErrors.set(type, null);
+    if (hadError) {
+      this.refreshErrorBar();
+    }
+  }
+
+  private clearAllErrors():void {
+    this.currentErrors.clear();
+    if (this.errorMessage.length > 0) {
+      this.refreshErrorBar();
+    }
+  }
+
+  private refreshErrorBar(): void {
+    let error = this.currentErrors.getFirstError();
+
+    let hadError = this.errorMessage.length > 0;
+    if (error) {
+      this.errorMessage = error;
+      this.disableButton = this.currentErrors.isStateBlocking() ? true : false;
+    } else {
+      this.errorMessage = '';
+      this.disableButton = false;
+    }
+
+    if ((error && !hadError) || (!error && hadError)) {
+      let offset: number = error ? CONFIG_MENU_ROW_PX : -CONFIG_MENU_ROW_PX;
+      this.adjustTerminal(offset);
+    }    
+  }  
+
   toggleMenu(state:boolean): void {
     this.showMenu = state;
-    let offset = state ? 94 : 14;
+    this.adjustTerminal(state ? CONFIG_MENU_SIZE_PX : -CONFIG_MENU_SIZE_PX);
+  }
+
+  private adjustTerminal(heightOffsetPx: number): void {
+    this.terminalHeightOffset += heightOffsetPx;    
     this.terminalDivStyle = {
-      top: `${offset}px`,
-      height: `calc(100% - ${offset}px)`
+      top: `${this.terminalHeightOffset}px`,
+      height: `calc(100% - ${this.terminalHeightOffset}px)`
     };
-    setTimeout(()=> {
-      this.terminal.performResize();
-    },100);
+    if (this.terminal) {
+      setTimeout(()=> {
+        this.terminal.performResize();
+      },100);
+    }
   }
 
   /* I expect a JSON here*/
@@ -202,6 +304,7 @@ export class AppComponent implements AfterViewInit {
     if (this.terminal.isConnected()) {
       this.terminal.close();
     } else {
+      this.clearAllErrors(); //reset due to user interaction
       this.terminal.connectToHost({
         host: this.host,
         port: this.port,
@@ -215,6 +318,55 @@ export class AppComponent implements AfterViewInit {
       });
     }
   }
+
+  //identical to isConnected for now, unless there's another reason to disable input
+  get isInputDisabled(): boolean {
+    return this.terminal.isConnected();
+  }
+
+  get isConnected(): boolean {
+    return this.terminal.isConnected();
+  }
+
+  get powerButtonColor(): string {
+    if (this.disableButton) {
+      return "#bf3030";
+    } else if (this.isConnected) {
+      return "#17da38";
+    } else {
+      return "#b9b9b9";
+    }
+  }
+
+  validateScreenDimension(): void {
+    if (this.row < 0 || !Number.isInteger(this.row)) {
+      this.setError(ErrorType.dimension, 'Row number missing or invalid');
+    } else if (this.column < 0 || !Number.isInteger(this.column)) {
+      this.setError(ErrorType.dimension, 'Column number missing or invalid');
+    } else if ((this.row * this.column) > 16383) {
+      let rowMax = Math.ceil(16383/this.column);
+      let colMax = Math.ceil(16383/this.row);
+      this.setError(ErrorType.dimension, `Screen dimension above 16383, decrease row to below ${rowMax} or column to below ${colMax}`);
+    } else if (this.errorMessage.length > 0) {
+      this.clearError(ErrorType.dimension);
+    }
+  }
+
+  validatePort(): void {
+    if (this.port < 0 || this.port > 65535 || !Number.isInteger(this.port)) {
+      this.setError(ErrorType.port, `Port missing or invalid`);
+    } else {
+      this.clearError(ErrorType.port);
+    }
+  }
+
+  validateHost(): void {
+    if (!this.host) {
+      this.setError(ErrorType.host, `Host missing or invalid`);
+    } else {
+      this.clearError(ErrorType.host);
+    }
+  } 
 
 
   loadConfig(): Observable<ConfigServiceTerminalConfig> {
