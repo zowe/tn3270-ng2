@@ -18,7 +18,7 @@ import {Http, Response, Headers, RequestOptionsArgs} from '@angular/http';
 import {Observable} from 'rxjs/Rx';
 
 export class TerminalStateHelper {
-  private static url:string = `${window.location.protocol}//${window.location.host}/ZLUX/plugins/com.rs.zossystem.subsystems/services/data/zosDiscovery/system/tn3270`;
+  private static url:string = `${window.location.protocol}//${window.location.host}/ZLUX/plugins/com.rs.zossystem.subsystems/services/data/_current/zosDiscovery/system/tn3270`;
   
   constructor(public http: Http, 
               public log: ZLUX.ComponentLogger){
