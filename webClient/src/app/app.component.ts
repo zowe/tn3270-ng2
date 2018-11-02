@@ -10,7 +10,7 @@
 
 import 'script-loader!./../lib/js/tn3270.js';
 import { AfterViewInit, OnDestroy, Component, ElementRef, Input, ViewChild, Inject } from '@angular/core';
-import {Http, Response} from '@angular/http';
+import {HttpClient} from '@angular/common/http';
 import {Observable} from 'rxjs/Rx';
 import 'rxjs/add/operator/map';
 declare var TERMINAL_DEFAULT_CHARSETS: any;
@@ -95,7 +95,7 @@ export class AppComponent implements AfterViewInit {
   disableButton: boolean;
 
   constructor(
-    private http: Http,
+    private http: HttpClient,
     @Inject(Angular2InjectionTokens.LOGGER) private log: ZLUX.ComponentLogger,
     @Inject(Angular2InjectionTokens.PLUGIN_DEFINITION) private pluginDefinition: ZLUX.ContainerPluginDefinition,
     @Inject(Angular2InjectionTokens.VIEWPORT_EVENTS) private viewportEvents: Angular2PluginViewportEvents,
@@ -369,10 +369,9 @@ export class AppComponent implements AfterViewInit {
   } 
 
 
-  loadConfig(): Observable<ConfigServiceTerminalConfig> {
+  loadConfig(): Observable<Object> {
     this.log.warn("Config load is wrong and not abstracted");
-    return this.http.get(ZoweZLUX.uriBroker.pluginConfigForScopeUri(this.pluginDefinition.getBasePlugin(),'instance','sessions','_defaultTN3270.json'))
-      .map((res: Response) => res.json());
+    return this.http.get(ZoweZLUX.uriBroker.pluginConfigForScopeUri(this.pluginDefinition.getBasePlugin(),'instance','sessions','_defaultTN3270.json'));
   }
 }
 

@@ -14,31 +14,30 @@ import { Subject } from 'rxjs/Subject';
 declare var start3270: any;
 
 import {Injectable} from '@angular/core';
-import {Http, Response, Headers, RequestOptionsArgs} from '@angular/http';
+import {HttpClient, HttpHeaders} from '@angular/common/http';
 import {Observable} from 'rxjs/Rx';
 
 export class TerminalStateHelper {
   private static url:string = `${window.location.protocol}//${window.location.host}/ZLUX/plugins/com.rs.zossystem.subsystems/services/data/zosDiscovery/system/tn3270`;
   
-  constructor(public http: Http, 
+  constructor(public http: HttpClient, 
               public log: ZLUX.ComponentLogger){
   }
 
   getAll(luname?:string): Observable<any> {
     let result = this.http
-      .get(luname ? TerminalStateHelper.url+'?luname='+luname : TerminalStateHelper.url, this.getHeaders()).map((res:Response)=>res.json());
+      .get(luname ? TerminalStateHelper.url+'?luname='+luname : TerminalStateHelper.url, this.getHeaders());
     result.catch(this.handleError);
 
     return result;
   }
 
-  getHeaders(): RequestOptionsArgs {
-    let headers = new Headers();
-    let result: RequestOptionsArgs = {headers: headers};
-
-    headers.append('Accept', 'application/json');
-
-    return result;
+  getHeaders(): Object {
+    return {
+      headers: new HttpHeaders({
+      'Accept': 'application/json'
+      })
+    };
   }
   
   handleError(error: any): Observable<void> {
@@ -61,7 +60,7 @@ export class Terminal {
   constructor(
     private terminalElement: HTMLElement,
     private terminalParentElement: HTMLElement,
-    public http: Http,
+    public http: HttpClient,
     public pluginDefinition: ZLUX.ContainerPluginDefinition,
     private log: ZLUX.ComponentLogger
   ) { }
