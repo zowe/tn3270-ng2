@@ -11,11 +11,11 @@
 
 <project name="tn3270" xmlns:if="ant:if" xmlns:unless="ant:unless">
     <target name="deploy">
-      <mkdir dir="${deploy}/instance/ZLUX/pluginStorage/com.rs.mvd.tn3270/sessions"/>
+      <mkdir dir="${deploy}/instance/ZLUX/pluginStorage/org.zowe.terminal.tn3270/sessions"/>
       <exec if:set="isZos" executable="sh">
-        <arg line="-c 'cp -p ../_defaultTN3270.json ${deploy}/instance/ZLUX/pluginStorage/com.rs.mvd.tn3270/sessions/_defaultTN3270.json'"/>
+        <arg line="-c 'cp -p ../_defaultTN3270.json ${deploy}/instance/ZLUX/pluginStorage/org.zowe.terminal.tn3270/sessions/_defaultTN3270.json'"/>
       </exec>
-      <copy unless:set="isZos" file="../_defaultTN3270.json" tofile="${deploy}/instance/ZLUX/pluginStorage/com.rs.mvd.tn3270/sessions/_defaultTN3270.json"/>
+      <copy unless:set="isZos" file="../_defaultTN3270.json" tofile="${deploy}/instance/ZLUX/pluginStorage/org.zowe.terminal.tn3270/sessions/_defaultTN3270.json"/>
     </target>
 </project>
 

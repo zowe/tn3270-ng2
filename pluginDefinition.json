@@ -1,7 +1,7 @@
 {
-  "identifier": "com.rs.mvd.tn3270",
+  "identifier": "org.zowe.terminal.tn3270",
   "apiVersion": "1.0.0",
-  "pluginVersion": "0.9.0",
+  "pluginVersion": "0.9.4",
   "pluginType": "application",
   "webContent": {
     "framework": "angular2",
@@ -28,5 +28,18 @@
       }
     }
   },
-  "dataServices": []
+  "dataServices": [
+    {
+      "type": "import",
+      "localName": "terminalstream",
+      "sourceName": "tn3270data",
+      "sourcePlugin": "org.zowe.terminal.proxy"
+    },
+    {
+      "type": "import",
+      "localName": "statediscovery",
+      "sourceName": "data",
+      "sourcePlugin": "org.zowe.zossystem.subsystems"
+    }
+  ]
 }
