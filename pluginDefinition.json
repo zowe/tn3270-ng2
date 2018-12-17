@@ -33,13 +33,15 @@
       "type": "import",
       "localName": "terminalstream",
       "sourceName": "tn3270data",
-      "sourcePlugin": "org.zowe.terminal.proxy"
+      "sourcePlugin": "org.zowe.terminal.proxy",
+      "versionRange": "^1.0.0"
     },
     {
       "type": "import",
       "localName": "statediscovery",
       "sourceName": "data",
-      "sourcePlugin": "org.zowe.zossystem.subsystems"
+      "sourcePlugin": "org.zowe.zossystem.subsystems",
+      "versionRange": "^1.0.0"
     }
   ]
 }
