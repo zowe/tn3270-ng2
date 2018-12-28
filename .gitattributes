@@ -1,8 +1,50 @@
-# Default to EBCDIC unless otherwise specified
-*                working-tree-encoding=ibm-1047 git-encoding=iso8859-1
-
-# The git attributes and ignore files MUST be ASCII
-*.gitattributes  working-tree-encoding=iso8859-1 git-encoding=iso8859-1
-*.gitignore      working-tree-encoding=iso8859-1 git-encoding=iso8859-1
-sonar-project.properties git-encoding=iso8859-1 working-tree-encoding=iso8859-1
-
+# This .gitattributes file will cause all text files EXCEPT for
+# git's .gitattributes and .gitignore files to be encoded as EBCDIC.
+# Selected binary files will not be translated at all.
+# The default for text files
+*       git-encoding=iso8859-1 zos-working-tree-encoding=ibm-1047
+# git's files (which MUST be ASCII)
+.gitattributes   git-encoding=iso8859-1 zos-working-tree-encoding=iso8859-1
+.gitignore       git-encoding=iso8859-1 zos-working-tree-encoding=iso8859-1
+# Binary files, selected by file extension.
+#
+# Note that "Binary" really just means "Not touched when moved
+# between the git repository and the working tree." In some cases
+# these are actually UTF-8 or CP1251 (the usual Windows code page).
+#
+# If you don't have these in your tree, removing these from the
+# .gitattributes file will speed up git's processing a bit.
+*.jpg   git-encoding=BINARY    working-tree-encoding=BINARY
+*.crx   git-encoding=BINARY    working-tree-encoding=BINARY
+*.eot   git-encoding=BINARY    working-tree-encoding=BINARY
+*.fdt   git-encoding=BINARY    working-tree-encoding=BINARY
+*.fdx   git-encoding=BINARY    working-tree-encoding=BINARY
+*.gen   git-encoding=BINARY    working-tree-encoding=BINARY
+*.gif   git-encoding=BINARY    working-tree-encoding=BINARY
+*.gz    git-encoding=BINARY    working-tree-encoding=BINARY
+*.ico   git-encoding=BINARY    working-tree-encoding=BINARY
+*.jar   git-encoding=BINARY    working-tree-encoding=BINARY
+*.jpg   git-encoding=BINARY    working-tree-encoding=BINARY
+*.node  git-encoding=BINARY    working-tree-encoding=BINARY
+*.otf   git-encoding=BINARY    working-tree-encoding=BINARY
+*.png   git-encoding=BINARY    working-tree-encoding=BINARY
+*.PNG   git-encoding=BINARY    working-tree-encoding=BINARY
+*.resources   git-encoding=BINARY    working-tree-encoding=BINARY
+*.scss  git-encoding=BINARY    working-tree-encoding=BINARY
+*.segments_1   git-encoding=BINARY    working-tree-encoding=BINARY
+*.so    git-encoding=BINARY    working-tree-encoding=BINARY
+*.svg   git-encoding=BINARY    working-tree-encoding=BINARY
+*.swp   git-encoding=BINARY    working-tree-encoding=BINARY
+*.tar   git-encoding=BINARY    working-tree-encoding=BINARY
+*.tgz   git-encoding=BINARY    working-tree-encoding=BINARY
+*.tii   git-encoding=BINARY    working-tree-encoding=BINARY
+*.tis   git-encoding=BINARY    working-tree-encoding=BINARY
+*.tree  git-encoding=BINARY    working-tree-encoding=BINARY
+*.ttf   git-encoding=BINARY    working-tree-encoding=BINARY
+*.woff  git-encoding=BINARY    working-tree-encoding=BINARY
+*.woff2 git-encoding=BINARY    working-tree-encoding=BINARY
+*.zip   git-encoding=BINARY    working-tree-encoding=BINARY
+# Always use LF for npm package files because npm cli likes to change line endings.
+package*.json text eol=lf
+# sonar scanning
+sonar-project.properties git-encoding=iso8859-1 zos-working-tree-encoding=iso8859-1
