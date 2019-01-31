@@ -37,11 +37,14 @@
       "versionRange": "^1.0.0"
     },
     {
-      "type": "import",
-      "localName": "statediscovery",
-      "sourceName": "data",
-      "sourcePlugin": "org.zowe.zossystem.subsystems",
-      "versionRange": "^1.0.0"
+      "type": "service",
+      "name": "statediscovery",
+      "initializerLookupMethod": "internal",
+      "initializerName": "zosDiscoveryServiceInstaller",
+      "methods": [
+        "GET"
+      ],
+      "version": "1.0.0"
     }
   ]
 }
