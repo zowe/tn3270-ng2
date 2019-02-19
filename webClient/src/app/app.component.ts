@@ -71,7 +71,7 @@ class ErrorState {
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })
-export class AppComponent implements AfterViewInit, MVDHosting.ViewportCloseHandler {
+export class AppComponent implements AfterViewInit {
   @ViewChild('terminal')
   terminalElementRef: ElementRef;
   @ViewChild('terminalParent')
@@ -139,16 +139,14 @@ export class AppComponent implements AfterViewInit, MVDHosting.ViewportCloseHand
   }
 
   ngOnInit(): void {
-    this.viewportEvents.registerCloseHandler(this);
-  }
-
-  onViewportClosed(): Promise<void> {
-    return new Promise((resolve,reject)=> {
-      this.ngOnDestroy();
-      resolve();
+    this.viewportEvents.registerCloseHandler(():Promise<void>=> {
+      return new Promise((resolve,reject)=> {
+        this.ngOnDestroy();
+        resolve();
+      });
     });
   }
-
+  
   modTypeChange(value:string): void {
     this.isDynamic = (value === "5");
   }
