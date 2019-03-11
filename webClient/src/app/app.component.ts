@@ -189,7 +189,7 @@ export class AppComponent implements AfterViewInit {
           host: this.host,
           port: this.port
         }
-        this.terminal.connectToHost(this.connectionSettings);
+        this.connectAndSetTitle(this.connectionSettings);
       }, (error) => {
         if (error.status && error.statusText) {
           this.setError(ErrorType.config, `Config load status=${error.status}, text=${error.statusText}`);
@@ -199,7 +199,7 @@ export class AppComponent implements AfterViewInit {
         }
       });
     } else {
-      this.terminal.connectToHost(this.connectionSettings);
+      this.connectAndSetTitle(this.connectionSettings);
     }
     log.info('END: Tn3270 ngAfterViewInit');
   }
@@ -212,6 +212,7 @@ export class AppComponent implements AfterViewInit {
     let message = "Terminal closed due to websocket error. Code="+error.code;
     this.log.warn(message+", Reason="+error.reason);
     this.setError(ErrorType.websocket, message);
+    this.disconnectAndUnsetTitle();
   }
 
   private setError(type: ErrorType, message: string):void {
@@ -278,7 +279,7 @@ export class AppComponent implements AfterViewInit {
       }
       switch (eventContext.data.type) {
       case 'disconnect':
-        resolve(this.terminal.close());
+        resolve(this.disconnectAndUnsetTitle());
         break;
       case 'connectionInfo':
         let hostInfo = this.terminal.virtualScreen.hostInfo;
@@ -302,10 +303,10 @@ export class AppComponent implements AfterViewInit {
 
   toggleConnection(): void {
     if (this.terminal.isConnected()) {
-      this.terminal.close();
+      this.disconnectAndUnsetTitle();
     } else {
       this.clearAllErrors(); //reset due to user interaction
-      this.terminal.connectToHost({
+      this.connectAndSetTitle({
         host: this.host,
         port: this.port,
         security: {
@@ -317,6 +318,18 @@ export class AppComponent implements AfterViewInit {
         charsetName: this.selectedCodepage
       });
     }
+  }
+
+  private disconnectAndUnsetTitle() {
+    this.terminal.close();
+    if (this.windowActions) {this.windowActions.setTitle(`TN3270 - Disconnected`);}
+  }
+
+  private connectAndSetTitle(connectionSettings:any) {
+    if (this.windowActions) {
+      this.windowActions.setTitle(`TN3270 - ${connectionSettings.host}:${connectionSettings.port}`);
+    }
+    this.terminal.connectToHost(connectionSettings);
   }
 
   //identical to isConnected for now, unless there's another reason to disable input
