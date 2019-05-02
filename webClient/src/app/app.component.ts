@@ -310,6 +310,9 @@ export class AppComponent implements AfterViewInit {
         this.loadZssSettings().subscribe((zssSettings: ZssConfig) => {
           this.host = zssSettings.zssServerHostName;
           resolve(this.host);
+        }, () => {
+          this.setError(ErrorType.host, "Invalid Hostname: \"" + this.host + "\".")
+          reject(this.host)
         });
       } else {
         resolve(this.host);
