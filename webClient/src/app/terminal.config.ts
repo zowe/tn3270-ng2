@@ -13,7 +13,20 @@
 export class TerminalConfig {
   constructor(
     public host: string,
-    public port: number
+    public port: number,
+    public security: SecurityConfig,
+    public deviceType?: number,
+    public alternateHeight?: number,
+    public alternateWidth?: number,
+    public charsetName?: string
+  ) {
+
+  }
+}
+
+export class SecurityConfig {
+  constructor(
+    public type: string
   ) {
 
   }
