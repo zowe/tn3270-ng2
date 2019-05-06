@@ -9,7 +9,7 @@
 */
 
 import 'script-loader!./../lib/js/tn3270.js';
-import { AfterViewInit, OnDestroy, Component, ElementRef, Input, ViewChild, Inject } from '@angular/core';
+import { AfterViewInit, OnDestroy, Component, ElementRef, Input, ViewChild, Inject, Optional } from '@angular/core';
 import {Http, Response} from '@angular/http';
 import {Observable} from 'rxjs/Rx';
 import 'rxjs/add/operator/map';
@@ -18,7 +18,7 @@ declare var TERMINAL_DEFAULT_CHARSETS: any;
 import { Angular2InjectionTokens, Angular2PluginWindowActions, Angular2PluginViewportEvents, ContextMenuItem } from 'pluginlib/inject-resources';
 
 import { Terminal, TerminalWebsocketError} from './terminal';
-import {ConfigServiceTerminalConfig, TerminalConfig} from './terminal.config';
+import {ConfigServiceTerminalConfig, TerminalConfig, ZssConfig} from './terminal.config';
 
 const TOGGLE_MENU_BUTTON_PX = 16; //with padding
 const CONFIG_MENU_ROW_PX = 40;
@@ -99,7 +99,7 @@ export class AppComponent implements AfterViewInit {
     @Inject(Angular2InjectionTokens.LOGGER) private log: ZLUX.ComponentLogger,
     @Inject(Angular2InjectionTokens.PLUGIN_DEFINITION) private pluginDefinition: ZLUX.ContainerPluginDefinition,
     @Inject(Angular2InjectionTokens.VIEWPORT_EVENTS) private viewportEvents: Angular2PluginViewportEvents,
-    @Inject(Angular2InjectionTokens.WINDOW_ACTIONS) private windowActions: Angular2PluginWindowActions,
+    @Optional() @Inject(Angular2InjectionTokens.WINDOW_ACTIONS) private windowActions: Angular2PluginWindowActions,
     @Inject(Angular2InjectionTokens.LAUNCH_METADATA) private launchMetadata: any,
   ) {   
     this.log.debug("Component Constructor");
@@ -139,14 +139,14 @@ export class AppComponent implements AfterViewInit {
   }
 
   ngOnInit(): void {
-    this.windowActions.registerCloseHandler(():Promise<void>=> {
+    this.viewportEvents.registerCloseHandler(():Promise<void>=> {
       return new Promise((resolve,reject)=> {
         this.ngOnDestroy();
         resolve();
       });
     });
   }
-
+  
   modTypeChange(value:string): void {
     this.isDynamic = (value === "5");
   }
@@ -160,26 +160,28 @@ export class AppComponent implements AfterViewInit {
     const terminalParentElement = this.terminalParentElementRef.nativeElement;
     this.terminal = new Terminal(terminalElement, terminalParentElement, this.http, this.pluginDefinition, this.log);
     this.viewportEvents.resized.subscribe(() => this.terminal.performResize());
-    this.terminal.contextMenuEmitter.subscribe( (info) => {
-      let screenContext:any = info.screenContext;
-      screenContext["sourcePluginID"] = this.pluginDefinition.getBasePlugin().getIdentifier();
-      log.info("app.comp subcribe lambda, dispatcher="+dispatcher);
-      let recognizers:any[] = dispatcher.getRecognizers(screenContext);
-      log.info("recoginzers "+recognizers);
-      let menuItems:ContextMenuItem[] = [];
-      for (let recognizer of recognizers){
-        let action = dispatcher.getAction(recognizer);
-        log.debug("JOE:recognizer="+JSON.stringify(recognizer)+" action="+action);
-        if (action){
-          let menuCallback = () => {
-            dispatcher.invokeAction(action,info.screenContext);
+    if (this.windowActions) {
+      this.terminal.contextMenuEmitter.subscribe( (info) => {
+        let screenContext:any = info.screenContext;
+        screenContext["sourcePluginID"] = this.pluginDefinition.getBasePlugin().getIdentifier();
+        log.info("app.comp subcribe lambda, dispatcher="+dispatcher);
+        let recognizers:any[] = dispatcher.getRecognizers(screenContext);
+        log.info("recoginzers "+recognizers);
+        let menuItems:ContextMenuItem[] = [];
+        for (let recognizer of recognizers){
+          let action = dispatcher.getAction(recognizer);
+          log.debug("JOE:recognizer="+JSON.stringify(recognizer)+" action="+action);
+          if (action){
+            let menuCallback = () => {
+              dispatcher.invokeAction(action,info.screenContext);
+            }
+            // menu items can also have children
+            menuItems.push({text: action.getDefaultName(), action: menuCallback});
           }
-          // menu items can also have children
-          menuItems.push({text: action.getDefaultName(), action: menuCallback});
         }
-      }
-      this.windowActions.spawnContextMenu(info.x, info.y, menuItems);
-    });
+        this.windowActions.spawnContextMenu(info.x, info.y, menuItems);
+      });
+    }
     this.terminal.wsErrorEmitter.subscribe((error: TerminalWebsocketError)=> this.onWSError(error));
     if (!this.connectionSettings) {
       this.loadConfig().subscribe((config: ConfigServiceTerminalConfig) => {
@@ -189,7 +191,13 @@ export class AppComponent implements AfterViewInit {
           host: this.host,
           port: this.port
         }
-        this.connectAndSetTitle(this.connectionSettings);
+        this.checkZssProxy().then(() => {
+          this.connectionSettings = {
+            host: this.host,
+            port: this.port
+          }
+          this.connectAndSetTitle(this.connectionSettings);
+        })
       }, (error) => {
         if (error.status && error.statusText) {
           this.setError(ErrorType.config, `Config load status=${error.status}, text=${error.statusText}`);
@@ -301,6 +309,22 @@ export class AppComponent implements AfterViewInit {
     }
   }
 
+  checkZssProxy(): Promise<any> {
+    return new Promise((resolve, reject) => {
+      if (this.host === "") {
+        this.loadZssSettings().subscribe((zssSettings: ZssConfig) => {
+          this.host = zssSettings.zssServerHostName;
+          resolve(this.host);
+        }, () => {
+          this.setError(ErrorType.host, "Invalid Hostname: \"" + this.host + "\".")
+          reject(this.host)
+        });
+      } else {
+        resolve(this.host);
+      }
+    });
+  }
+
   toggleConnection(): void {
     if (this.terminal.isConnected()) {
       this.disconnectAndUnsetTitle();
@@ -386,6 +410,10 @@ export class AppComponent implements AfterViewInit {
     this.log.warn("Config load is wrong and not abstracted");
     return this.http.get(ZoweZLUX.uriBroker.pluginConfigForScopeUri(this.pluginDefinition.getBasePlugin(),'instance','sessions','_defaultTN3270.json'))
       .map((res: Response) => res.json());
+  }
+
+  loadZssSettings(): Observable<ZssConfig> {
+    return this.http.get(ZoweZLUX.uriBroker.serverRootUri("server/proxies")).map((res: Response) => res.json());
   }
 }
 
