@@ -43,7 +43,13 @@ export class ConfigServiceTerminalConfig {
   }
 }
 
-
+export class ZssConfig {
+  constructor(
+    public zssServerHostName: string,
+    public zssPort: string
+  ) {
+  }
+}
 
 /*
   This program and the accompanying materials are
