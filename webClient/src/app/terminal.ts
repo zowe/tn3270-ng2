@@ -20,7 +20,7 @@ import {Observable} from 'rxjs/Rx';
 export class TerminalStateHelper {
   private url:string;
   
-  constructor(public http: Http, 
+  constructor(public http: HttpClient, 
               public log: ZLUX.ComponentLogger,
              pluginDefinition: any){
     this.url = ZoweZLUX.uriBroker.pluginRESTUri(pluginDefinition.getBasePlugin(), 'stateDiscovery', '/zosDiscovery/system/tn3270');
