@@ -9,7 +9,7 @@
 */
 
 import 'script-loader!./../lib/js/tn3270.js';
-import { AfterViewInit, OnDestroy, Component, ElementRef, Input, ViewChild, Inject } from '@angular/core';
+import { AfterViewInit, OnDestroy, Component, ElementRef, Input, ViewChild, Inject, Optional } from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {Observable} from 'rxjs/Rx';
 import 'rxjs/add/operator/map';
@@ -18,7 +18,7 @@ declare var TERMINAL_DEFAULT_CHARSETS: any;
 import { Angular2InjectionTokens, Angular2PluginWindowActions, Angular2PluginViewportEvents, ContextMenuItem } from 'pluginlib/inject-resources';
 
 import { Terminal, TerminalWebsocketError} from './terminal';
-import {ConfigServiceTerminalConfig, TerminalConfig} from './terminal.config';
+import {ConfigServiceTerminalConfig, TerminalConfig, ZssConfig} from './terminal.config';
 
 const TOGGLE_MENU_BUTTON_PX = 16; //with padding
 const CONFIG_MENU_ROW_PX = 40;
@@ -99,10 +99,9 @@ export class AppComponent implements AfterViewInit {
     @Inject(Angular2InjectionTokens.LOGGER) private log: ZLUX.ComponentLogger,
     @Inject(Angular2InjectionTokens.PLUGIN_DEFINITION) private pluginDefinition: ZLUX.ContainerPluginDefinition,
     @Inject(Angular2InjectionTokens.VIEWPORT_EVENTS) private viewportEvents: Angular2PluginViewportEvents,
-    @Inject(Angular2InjectionTokens.WINDOW_ACTIONS) private windowActions: Angular2PluginWindowActions,
+    @Optional() @Inject(Angular2InjectionTokens.WINDOW_ACTIONS) private windowActions: Angular2PluginWindowActions,
     @Inject(Angular2InjectionTokens.LAUNCH_METADATA) private launchMetadata: any,
-  ) {   
-    this.log.debug("Component Constructor");
+  ) {
     this.log.info('Recvd launch metadata='+JSON.stringify(launchMetadata));
     if (launchMetadata != null && launchMetadata.data) {
       switch (launchMetadata.data.type) {
@@ -133,63 +132,78 @@ export class AppComponent implements AfterViewInit {
     if (!this.host) this.host = "localhost";
     if (!this.port) this.port = 23;
     if (!this.modType) this.modType = "1";
-    if (!this.securityType) this.securityType = "0";
+    if (!this.securityType) this.securityType = "telnet";
     if (!this.row) this.row = 24;
     if (!this.column) this.column = 80;
   }
 
   ngOnInit(): void {
-    this.windowActions.registerCloseHandler(():Promise<void>=> {
+    this.viewportEvents.registerCloseHandler(():Promise<void>=> {
       return new Promise((resolve,reject)=> {
         this.ngOnDestroy();
         resolve();
       });
     });
   }
-
+  
   modTypeChange(value:string): void {
     this.isDynamic = (value === "5");
   }
 
   ngAfterViewInit(): void {
     let log:ZLUX.ComponentLogger = this.log;
-    log.info('START: Tn3270 ngAfterViewInit');
+    log.debug('START: Tn3270 ngAfterViewInit');
     let dispatcher: ZLUX.Dispatcher = ZoweZLUX.dispatcher; 
-    log.info("JOE.Tn3270 app comp, dispatcher="+dispatcher);
     const terminalElement = this.terminalElementRef.nativeElement;
     const terminalParentElement = this.terminalParentElementRef.nativeElement;
     this.terminal = new Terminal(terminalElement, terminalParentElement, this.http, this.pluginDefinition, this.log);
     this.viewportEvents.resized.subscribe(() => this.terminal.performResize());
-    this.terminal.contextMenuEmitter.subscribe( (info) => {
-      let screenContext:any = info.screenContext;
-      screenContext["sourcePluginID"] = this.pluginDefinition.getBasePlugin().getIdentifier();
-      log.info("app.comp subcribe lambda, dispatcher="+dispatcher);
-      let recognizers:any[] = dispatcher.getRecognizers(screenContext);
-      log.info("recoginzers "+recognizers);
-      let menuItems:ContextMenuItem[] = [];
-      for (let recognizer of recognizers){
-        let action = dispatcher.getAction(recognizer);
-        log.debug("JOE:recognizer="+JSON.stringify(recognizer)+" action="+action);
-        if (action){
-          let menuCallback = () => {
-            dispatcher.invokeAction(action,info.screenContext);
+    if (this.windowActions) {
+      this.terminal.contextMenuEmitter.subscribe( (info) => {
+        let screenContext:any = info.screenContext;
+        screenContext["sourcePluginID"] = this.pluginDefinition.getBasePlugin().getIdentifier();
+        let recognizers:any[] = dispatcher.getRecognizers(screenContext);
+        let menuItems:ContextMenuItem[] = [];
+        for (let recognizer of recognizers){
+          let action = dispatcher.getAction(recognizer);
+          log.debug("Recognizer="+JSON.stringify(recognizer)+" action="+action);
+          if (action){
+            let menuCallback = () => {
+              dispatcher.invokeAction(action,info.screenContext);
+            }
+            // menu items can also have children
+            menuItems.push({text: action.getDefaultName(), action: menuCallback});
           }
-          // menu items can also have children
-          menuItems.push({text: action.getDefaultName(), action: menuCallback});
         }
-      }
-      this.windowActions.spawnContextMenu(info.x, info.y, menuItems);
-    });
+        this.windowActions.spawnContextMenu(info.x, info.y, menuItems);
+      });
+    }
     this.terminal.wsErrorEmitter.subscribe((error: TerminalWebsocketError)=> this.onWSError(error));
     if (!this.connectionSettings) {
       this.loadConfig().subscribe((config: ConfigServiceTerminalConfig) => {
-        this.host = config.contents.host;
-        this.port = config.contents.port;
-        this.connectionSettings = {
-          host: this.host,
-          port: this.port
-        }
-        this.terminal.connectToHost(this.connectionSettings);
+
+        const contents = config.contents;
+        this.host = contents.host;
+        this.port = contents.port;
+        this.securityType = contents.security.type;
+        if (contents.deviceType) { this.modType = ''+contents.deviceType; }
+        if (contents.alternateHeight) { this.row = contents.alternateHeight; }
+        if (contents.alternateWidth) { this.column = contents.alternateWidth; }
+        if (contents.charsetName) { this.selectedCodepage = contents.charsetName; }
+        this.checkZssProxy().then(() => {
+          this.connectionSettings = {
+            host: this.host,
+            port: this.port,
+            security: {
+              type: this.securityType
+            },
+            deviceType: Number(this.modType),
+            alternateHeight: this.row,
+            alternateWidth: this.column,
+            charsetName: this.selectedCodepage
+          }
+          this.connectAndSetTitle(this.connectionSettings);
+        })
       }, (error) => {
         if (error.status && error.statusText) {
           this.setError(ErrorType.config, `Config load status=${error.status}, text=${error.statusText}`);
@@ -199,9 +213,19 @@ export class AppComponent implements AfterViewInit {
         }
       });
     } else {
-      this.terminal.connectToHost(this.connectionSettings);
+      this.connectAndSetTitle(Object.assign({
+        host: this.host,
+        port: this.port,
+        security: {
+          type: this.securityType
+        },
+        deviceType: Number(this.modType),
+        alternateHeight: this.row,
+        alternateWidth: this.column,
+        charsetName: this.selectedCodepage
+      }, this.connectionSettings));
     }
-    log.info('END: Tn3270 ngAfterViewInit');
+    log.debug('END: Tn3270 ngAfterViewInit');
   }
 
   ngOnDestroy(): void {
@@ -212,6 +236,7 @@ export class AppComponent implements AfterViewInit {
     let message = "Terminal closed due to websocket error. Code="+error.code;
     this.log.warn(message+", Reason="+error.reason);
     this.setError(ErrorType.websocket, message);
+    this.disconnectAndUnsetTitle();
   }
 
   private setError(type: ErrorType, message: string):void {
@@ -278,7 +303,7 @@ export class AppComponent implements AfterViewInit {
       }
       switch (eventContext.data.type) {
       case 'disconnect':
-        resolve(this.terminal.close());
+        resolve(this.disconnectAndUnsetTitle());
         break;
       case 'connectionInfo':
         let hostInfo = this.terminal.virtualScreen.hostInfo;
@@ -300,16 +325,32 @@ export class AppComponent implements AfterViewInit {
     }
   }
 
+  checkZssProxy(): Promise<any> {
+    return new Promise((resolve, reject) => {
+      if (this.host === "") {
+        this.loadZssSettings().subscribe((zssSettings: ZssConfig) => {
+          this.host = zssSettings.zssServerHostName;
+          resolve(this.host);
+        }, () => {
+          this.setError(ErrorType.host, "Invalid Hostname: \"" + this.host + "\".")
+          reject(this.host)
+        });
+      } else {
+        resolve(this.host);
+      }
+    });
+  }
+
   toggleConnection(): void {
     if (this.terminal.isConnected()) {
-      this.terminal.close();
+      this.disconnectAndUnsetTitle();
     } else {
       this.clearAllErrors(); //reset due to user interaction
-      this.terminal.connectToHost({
+      this.connectAndSetTitle({
         host: this.host,
         port: this.port,
         security: {
-          type: Number(this.securityType)
+          type: this.securityType
         },
         deviceType: Number(this.modType),
         alternateHeight: this.row,
@@ -317,6 +358,18 @@ export class AppComponent implements AfterViewInit {
         charsetName: this.selectedCodepage
       });
     }
+  }
+
+  private disconnectAndUnsetTitle() {
+    this.terminal.close();
+    if (this.windowActions) {this.windowActions.setTitle(`TN3270 - Disconnected`);}
+  }
+
+  private connectAndSetTitle(connectionSettings:any) {
+    if (this.windowActions) {
+      this.windowActions.setTitle(`TN3270 - ${connectionSettings.host}:${connectionSettings.port}`);
+    }
+    this.terminal.connectToHost(connectionSettings);
   }
 
   //identical to isConnected for now, unless there's another reason to disable input
@@ -372,6 +425,10 @@ export class AppComponent implements AfterViewInit {
   loadConfig(): Observable<Object> {
     this.log.warn("Config load is wrong and not abstracted");
     return this.http.get(ZoweZLUX.uriBroker.pluginConfigForScopeUri(this.pluginDefinition.getBasePlugin(),'instance','sessions','_defaultTN3270.json'));
+  }
+
+  loadZssSettings(): Observable<ZssConfig> {
+    return this.http.get(ZoweZLUX.uriBroker.serverRootUri("server/proxies")).map((res: Response) => res.json());
   }
 }
 

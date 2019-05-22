@@ -1,7 +1,7 @@
 {
-  "identifier": "com.rs.mvd.tn3270",
+  "identifier": "org.zowe.terminal.tn3270",
   "apiVersion": "1.0.0",
-  "pluginVersion": "0.9.0",
+  "pluginVersion": "0.9.5",
   "pluginType": "application",
   "webContent": {
     "framework": "angular2",
@@ -15,9 +15,7 @@
     "isSingleWindowApp": true,
     "defaultWindowStyle": {
       "width": 800,
-      "height": 600,
-      "x": 200,
-      "y": 50
+      "height": 600
     }
   },
   "configurationData": {
@@ -28,5 +26,23 @@
       }
     }
   },
-  "dataServices": []
+  "dataServices": [
+    {
+      "type": "import",
+      "localName": "terminalstream",
+      "sourceName": "tn3270data",
+      "sourcePlugin": "org.zowe.terminal.proxy",
+      "versionRange": "^1.0.0"
+    },
+    {
+      "type": "service",
+      "name": "statediscovery",
+      "initializerLookupMethod": "internal",
+      "initializerName": "zosDiscoveryServiceInstaller",
+      "methods": [
+        "GET"
+      ],
+      "version": "1.0.0"
+    }
+  ]
 }

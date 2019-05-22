@@ -18,15 +18,17 @@ import {HttpClient, HttpHeaders} from '@angular/common/http';
 import {Observable} from 'rxjs/Rx';
 
 export class TerminalStateHelper {
-  private static url:string = `${window.location.protocol}//${window.location.host}/ZLUX/plugins/com.rs.zossystem.subsystems/services/data/zosDiscovery/system/tn3270`;
+  private url:string;
   
-  constructor(public http: HttpClient, 
-              public log: ZLUX.ComponentLogger){
+  constructor(public http: Http, 
+              public log: ZLUX.ComponentLogger,
+             pluginDefinition: any){
+    this.url = ZoweZLUX.uriBroker.pluginRESTUri(pluginDefinition.getBasePlugin(), 'stateDiscovery', '/zosDiscovery/system/tn3270');
   }
 
   getAll(luname?:string): Observable<any> {
     let result = this.http
-      .get(luname ? TerminalStateHelper.url+'?luname='+luname : TerminalStateHelper.url, this.getHeaders());
+      .get(luname ? this.url+'?luname='+luname : this.url, this.getHeaders()).map((res:Response)=>res.json());
     result.catch(this.handleError);
 
     return result;
@@ -72,14 +74,12 @@ export class Terminal {
     const computedStyle = getComputedStyle(this.terminalElement, null);
     const width = parseInt(computedStyle.getPropertyValue('width'));
     const height = parseInt(computedStyle.getPropertyValue('height'));
-    const helper:TerminalStateHelper = new TerminalStateHelper(this.http,this.log);
+    const helper:TerminalStateHelper = new TerminalStateHelper(this.http,this.log,this.pluginDefinition);
+    let plugin:ZLUX.Plugin = this.pluginDefinition.getBasePlugin();
 
-
-    const myHost = window.location.host;
-    const protocol = window.location.protocol;
-    const wsProtocol = (protocol === 'https:') ? 'wss:' : 'ws:';
-    connectionSettings.url = `${wsProtocol}//${myHost}${ZoweZLUX.uriBroker.serverRootUri('ZLUX/plugins/com.rs.terminalproxy/services/tn3270data')}`;
+    connectionSettings.url = ZoweZLUX.uriBroker.pluginWSUri(plugin, 'terminalstream', '');
     connectionSettings.connect = true;
+    connectionSettings.security.type = connectionSettings.security.type == 'tls' ? 2 : 0;
     // logic for using dispatcher goes here
     // should be in Tn3270Service.js eventually
     let latestContext = {};
