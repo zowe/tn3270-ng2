@@ -101,8 +101,7 @@ export class AppComponent implements AfterViewInit {
     @Inject(Angular2InjectionTokens.VIEWPORT_EVENTS) private viewportEvents: Angular2PluginViewportEvents,
     @Optional() @Inject(Angular2InjectionTokens.WINDOW_ACTIONS) private windowActions: Angular2PluginWindowActions,
     @Inject(Angular2InjectionTokens.LAUNCH_METADATA) private launchMetadata: any,
-  ) {   
-    this.log.debug("Component Constructor");
+  ) {
     this.log.info('Recvd launch metadata='+JSON.stringify(launchMetadata));
     if (launchMetadata != null && launchMetadata.data) {
       switch (launchMetadata.data.type) {
@@ -133,7 +132,7 @@ export class AppComponent implements AfterViewInit {
     if (!this.host) this.host = "localhost";
     if (!this.port) this.port = 23;
     if (!this.modType) this.modType = "1";
-    if (!this.securityType) this.securityType = "0";
+    if (!this.securityType) this.securityType = "telnet";
     if (!this.row) this.row = 24;
     if (!this.column) this.column = 80;
   }
@@ -153,9 +152,8 @@ export class AppComponent implements AfterViewInit {
 
   ngAfterViewInit(): void {
     let log:ZLUX.ComponentLogger = this.log;
-    log.info('START: Tn3270 ngAfterViewInit');
+    log.debug('START: Tn3270 ngAfterViewInit');
     let dispatcher: ZLUX.Dispatcher = ZoweZLUX.dispatcher; 
-    log.info("JOE.Tn3270 app comp, dispatcher="+dispatcher);
     const terminalElement = this.terminalElementRef.nativeElement;
     const terminalParentElement = this.terminalParentElementRef.nativeElement;
     this.terminal = new Terminal(terminalElement, terminalParentElement, this.http, this.pluginDefinition, this.log);
@@ -164,13 +162,11 @@ export class AppComponent implements AfterViewInit {
       this.terminal.contextMenuEmitter.subscribe( (info) => {
         let screenContext:any = info.screenContext;
         screenContext["sourcePluginID"] = this.pluginDefinition.getBasePlugin().getIdentifier();
-        log.info("app.comp subcribe lambda, dispatcher="+dispatcher);
         let recognizers:any[] = dispatcher.getRecognizers(screenContext);
-        log.info("recoginzers "+recognizers);
         let menuItems:ContextMenuItem[] = [];
         for (let recognizer of recognizers){
           let action = dispatcher.getAction(recognizer);
-          log.debug("JOE:recognizer="+JSON.stringify(recognizer)+" action="+action);
+          log.debug("Recognizer="+JSON.stringify(recognizer)+" action="+action);
           if (action){
             let menuCallback = () => {
               dispatcher.invokeAction(action,info.screenContext);
@@ -185,16 +181,26 @@ export class AppComponent implements AfterViewInit {
     this.terminal.wsErrorEmitter.subscribe((error: TerminalWebsocketError)=> this.onWSError(error));
     if (!this.connectionSettings) {
       this.loadConfig().subscribe((config: ConfigServiceTerminalConfig) => {
-        this.host = config.contents.host;
-        this.port = config.contents.port;
-        this.connectionSettings = {
-          host: this.host,
-          port: this.port
-        }
+
+        const contents = config.contents;
+        this.host = contents.host;
+        this.port = contents.port;
+        this.securityType = contents.security.type;
+        if (contents.deviceType) { this.modType = ''+contents.deviceType; }
+        if (contents.alternateHeight) { this.row = contents.alternateHeight; }
+        if (contents.alternateWidth) { this.column = contents.alternateWidth; }
+        if (contents.charsetName) { this.selectedCodepage = contents.charsetName; }
         this.checkZssProxy().then(() => {
           this.connectionSettings = {
             host: this.host,
-            port: this.port
+            port: this.port,
+            security: {
+              type: this.securityType
+            },
+            deviceType: Number(this.modType),
+            alternateHeight: this.row,
+            alternateWidth: this.column,
+            charsetName: this.selectedCodepage
           }
           this.connectAndSetTitle(this.connectionSettings);
         })
@@ -207,9 +213,19 @@ export class AppComponent implements AfterViewInit {
         }
       });
     } else {
-      this.connectAndSetTitle(this.connectionSettings);
+      this.connectAndSetTitle(Object.assign({
+        host: this.host,
+        port: this.port,
+        security: {
+          type: this.securityType
+        },
+        deviceType: Number(this.modType),
+        alternateHeight: this.row,
+        alternateWidth: this.column,
+        charsetName: this.selectedCodepage
+      }, this.connectionSettings));
     }
-    log.info('END: Tn3270 ngAfterViewInit');
+    log.debug('END: Tn3270 ngAfterViewInit');
   }
 
   ngOnDestroy(): void {
@@ -334,7 +350,7 @@ export class AppComponent implements AfterViewInit {
         host: this.host,
         port: this.port,
         security: {
-          type: Number(this.securityType)
+          type: this.securityType
         },
         deviceType: Number(this.modType),
         alternateHeight: this.row,
