@@ -1,6 +1,6 @@
 {
   "name": "org.zowe.terminal.tn3270",
-  "version": "0.9.5",
+  "version": "0.10.0",
   "description": "A zLUX App implementing a TN3270 terminal emulator through web technologies.",
   "author": {
     "name": "Sean Grady",

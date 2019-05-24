@@ -1,7 +1,7 @@
 {
   "identifier": "org.zowe.terminal.tn3270",
   "apiVersion": "1.0.0",
-  "pluginVersion": "0.9.5",
+  "pluginVersion": "0.10.0",
   "pluginType": "application",
   "webContent": {
     "framework": "angular2",
