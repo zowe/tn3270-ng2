@@ -1,0 +1,10 @@
+I, 1000TurquoisePogs hereby sign-off-by all of my past commits to this repo subject to the Developer Certificate of Origin (DCO), Version 1.1. In the past I have used emails: sgrady@rocketsoftware.com and 0730276+1000TurquoisePogs@users.noreply.github.com
+
+8aa94fbda1a1c34a7abc5330eb5bca000f18b92d initial commit
+
+18ee8403e78aa98ef7bdd3611a752b2b0cd8f519 Update README.md
+
+Note on how to do initial configuration for the App's connection
+ec8cc847b8b29335988c5383b133f11d7ac8572b Update README.md
+
+Incorrect info in readme.
