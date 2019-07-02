@@ -1,6 +1,6 @@
 {
   "name": "org.zowe.terminal.tn3270",
-  "version": "0.10.0",
+  "version": "0.10.1",
   "description": "A zLUX App implementing a TN3270 terminal emulator through web technologies.",
   "author": {
     "name": "Sean Grady",
@@ -24,6 +24,7 @@
     "@angular/platform-browser-dynamic": "~6.0.9",
     "@angular/router": "~6.0.9",
     "angular2-template-loader": "~0.6.2",
+    "bootstrap": "~4.3.1",
     "codelyzer": "~4.4.2",
     "copy-webpack-plugin": "~4.5.2",
     "core-js": "~2.5.7",
