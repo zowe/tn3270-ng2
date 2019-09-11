@@ -13,7 +13,7 @@ import { AfterViewInit, OnDestroy, Component, ElementRef, Input, ViewChild, Inje
 import {Http, Response} from '@angular/http';
 import {Observable} from 'rxjs/Rx';
 import 'rxjs/add/operator/map';
-declare var TERMINAL_DEFAULT_CHARSETS: any;
+declare var org_zowe_terminal_tn3270: any;
 
 import { Angular2InjectionTokens, Angular2PluginWindowActions, Angular2PluginViewportEvents, ContextMenuItem } from 'pluginlib/inject-resources';
 
@@ -86,7 +86,7 @@ export class AppComponent implements AfterViewInit {
   isDynamic: boolean;
   row: number;
   column: number;
-  charsets: Array<any> = TERMINAL_DEFAULT_CHARSETS;
+  charsets: Array<any> = org_zowe_terminal_tn3270.TERMINAL_DEFAULT_CHARSETS;
   selectedCodepage: string = "International EBCDIC 1047";
   terminalDivStyle: any;
   showMenu: boolean;

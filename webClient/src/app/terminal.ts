@@ -11,7 +11,7 @@
 */
 import { Subject } from 'rxjs/Subject';
 
-declare var start3270: any;
+declare var org_zowe_terminal_tn3270: any;
 
 import {Injectable} from '@angular/core';
 import {Http, Response, Headers, RequestOptionsArgs} from '@angular/http';
@@ -114,7 +114,7 @@ export class Terminal {
       this.wsErrorEmitter.next({code: wsCode, reason: wsReason, terminalMessage: terminalMessage});
     };
 
-    this.virtualScreen = start3270({parentDiv:this.terminalElement,
+    this.virtualScreen = org_zowe_terminal_tn3270.start3270({parentDiv:this.terminalElement,
                                     width: width, height: height},
                                    connectionSettings,
                                    null,{contextCallback:contextCallback,
