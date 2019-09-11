@@ -1,8 +1,11 @@
 {
   "identifier": "org.zowe.terminal.tn3270",
   "apiVersion": "1.0.0",
-  "pluginVersion": "0.10.1",
+  "pluginVersion": "0.10.2",
   "pluginType": "application",
+  "license": "EPL-2.0",
+  "author": "Zowe",
+  "homepage": "https://github.com/zowe/tn3270-ng2",  
   "webContent": {
     "framework": "angular2",
     "launchDefinition": {
@@ -11,8 +14,7 @@
       "imageSrc": "assets/icon.png"
     },
     "descriptionKey": "TN3270 Description",
-    "descriptionDefault": "TN3270 Description",
-    "isSingleWindowApp": true,
+    "descriptionDefault": "TN3270 Terminal Emulator",
     "defaultWindowStyle": {
       "width": 800,
       "height": 600
@@ -26,7 +28,6 @@
       }
     }
   },
-  "license": "EPL-2.0",
   "dataServices": [
     {
       "type": "import",
