@@ -8,6 +8,8 @@ Copyright Contributors to the Zowe Project.
 # TN3270 App
 This an App that presents a TN3270 emulator within the Zowe UI environment.
 
+**To request features or report bugs, please use the issues page at the [zlux repo](https://github.com/zowe/zlux/issues) with the terminal, app, or tn3270-ng2 tags**
+
 When this App is opened in the Zowe UI by the user, it tries to connect to the default host.
 This default can be changed, and is controlled by https://github.com/zowe/tn3270-ng2/blob/master/_defaultTN3270.json which is stored within the [configuration dataservice](https://github.com/zowe/zlux/wiki/Configuration-Dataservice) at runtime.
 
