@@ -2,9 +2,9 @@
   This program and the accompanying materials are
   made available under the terms of the Eclipse Public License v2.0 which accompanies
   this distribution, and is available at https://www.eclipse.org/legal/epl-v20.html
-  
+
   SPDX-License-Identifier: EPL-2.0
-  
+
   Copyright Contributors to the Zowe Project.
 */
 
@@ -93,6 +93,7 @@ export class AppComponent implements AfterViewInit {
   private terminalHeightOffset: number = 0;
   private currentErrors: ErrorState = new ErrorState();
   disableButton: boolean;
+  private savedSettings: TerminalConfig;
 
   constructor(
     private http: Http,
@@ -123,7 +124,7 @@ export class AppComponent implements AfterViewInit {
         }
         break;
       default:
-        
+
       }
     }
     this.adjustTerminal(TOGGLE_MENU_BUTTON_PX);
@@ -145,7 +146,7 @@ export class AppComponent implements AfterViewInit {
       });
     });
   }
-  
+
   modTypeChange(value:string): void {
     this.isDynamic = (value === "5");
   }
@@ -153,7 +154,7 @@ export class AppComponent implements AfterViewInit {
   ngAfterViewInit(): void {
     let log:ZLUX.ComponentLogger = this.log;
     log.debug('START: Tn3270 ngAfterViewInit');
-    let dispatcher: ZLUX.Dispatcher = ZoweZLUX.dispatcher; 
+    let dispatcher: ZLUX.Dispatcher = ZoweZLUX.dispatcher;
     const terminalElement = this.terminalElementRef.nativeElement;
     const terminalParentElement = this.terminalParentElementRef.nativeElement;
     this.terminal = new Terminal(terminalElement, terminalParentElement, this.http, this.pluginDefinition, this.log);
@@ -201,7 +202,7 @@ export class AppComponent implements AfterViewInit {
             alternateHeight: this.row,
             alternateWidth: this.column,
             charsetName: this.selectedCodepage
-          }
+          };
           this.connectAndSetTitle(this.connectionSettings);
         })
       }, (error) => {
@@ -274,8 +275,8 @@ export class AppComponent implements AfterViewInit {
     if ((error && !hadError) || (!error && hadError)) {
       let offset: number = error ? CONFIG_MENU_ROW_PX : -CONFIG_MENU_ROW_PX;
       this.adjustTerminal(offset);
-    }    
-  }  
+    }
+  }
 
   toggleMenu(state:boolean): void {
     this.showMenu = state;
@@ -283,7 +284,7 @@ export class AppComponent implements AfterViewInit {
   }
 
   private adjustTerminal(heightOffsetPx: number): void {
-    this.terminalHeightOffset += heightOffsetPx;    
+    this.terminalHeightOffset += heightOffsetPx;
     this.terminalDivStyle = {
       top: `${this.terminalHeightOffset}px`,
       height: `calc(100% - ${this.terminalHeightOffset}px)`
@@ -313,7 +314,7 @@ export class AppComponent implements AfterViewInit {
       default:
         reject('Event context missing or unknown data.type');
       };
-    });    
+    });
   }
 
 
@@ -321,7 +322,7 @@ export class AppComponent implements AfterViewInit {
     return {
       onMessage: (eventContext: any): Promise<any> => {
         return this.zluxOnMessage(eventContext);
-      }      
+      }
     }
   }
 
@@ -419,7 +420,7 @@ export class AppComponent implements AfterViewInit {
     } else {
       this.clearError(ErrorType.host);
     }
-  } 
+  }
 
 
   loadConfig(): Observable<ConfigServiceTerminalConfig> {
@@ -431,17 +432,30 @@ export class AppComponent implements AfterViewInit {
   loadZssSettings(): Observable<ZssConfig> {
     return this.http.get(ZoweZLUX.uriBroker.serverRootUri("server/proxies")).map((res: Response) => res.json());
   }
+
+  saveSettings() {
+    this.http.put(ZoweZLUX.uriBroker.pluginConfigForScopeUri(this.pluginDefinition.getBasePlugin(), 'user', 'sessions', '_defaultVT.json.json'),
+      {
+        deviceType: Number(this.modType),
+        security: {
+          type: this.securityType
+        },
+        port: this.port,
+        host: this.host,
+        charsetName: this.selectedCodepage
+      }
+    )
+  }
+
 }
-
-
 
 /*
   This program and the accompanying materials are
   made available under the terms of the Eclipse Public License v2.0 which accompanies
   this distribution, and is available at https://www.eclipse.org/legal/epl-v20.html
-  
+
   SPDX-License-Identifier: EPL-2.0
-  
+
   Copyright Contributors to the Zowe Project.
 */
 
