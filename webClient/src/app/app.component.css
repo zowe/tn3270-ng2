@@ -59,6 +59,15 @@
   background-position: center;
 }
 
+.bookmark {
+  font-size: 24px;
+}
+
+.save-btn {
+  position: absolute;
+  right: 44px;
+}
+
 .toolbar-input {
   padding: 0;
 }

@@ -43,6 +43,9 @@
       <div class="power-toggle">
         <button type="submit" class="power-toggle-button btn" [style.background-color]="powerButtonColor" [disabled]="disableButton" (click)="toggleConnection()"></button>
       </div>
+      <div>
+        <button type="submit" (click)="saveSettings()"><div class="bookmark"><i class="fa fa-bookmark"></i></div></button>
+      </div>
     </div>
     <div class="form-group row toolbar-row" style="width: 100%; height:40px">
       <label class="col-sm-1 col-form-label">Column</label>
