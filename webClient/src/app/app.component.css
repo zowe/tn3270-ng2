@@ -59,6 +59,22 @@
   background-position: center;
 }
 
+.bookmark-button{
+  background-image: url(../assets/power.png);
+  width: 100%;
+  height: 100%;
+  background-size: 32px 32px;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.bookmark {
+  position: absolute;
+  right: 40px;
+  width: 38px;
+  height: 38px;
+}
+
 .toolbar-input {
   padding: 0;
 }
