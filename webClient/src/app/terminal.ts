@@ -9,38 +9,27 @@
   
   Copyright Contributors to the Zowe Project.
 */
-import { Subject } from 'rxjs/Subject';
+import { Subject } from 'rxjs';
 
 declare var org_zowe_terminal_tn3270: any;
 
 import {Injectable} from '@angular/core';
-import {Http, Response, Headers, RequestOptionsArgs} from '@angular/http';
-import {Observable} from 'rxjs/Rx';
+import {HttpClient} from '@angular/common/http';
+import {Observable} from 'rxjs';
+import {catchError} from 'rxjs/operators';
 
 export class TerminalStateHelper {
   private url:string;
   
-  constructor(public http: Http, 
+  constructor(public http: HttpClient, 
               public log: ZLUX.ComponentLogger,
              pluginDefinition: any){
     this.url = ZoweZLUX.uriBroker.pluginRESTUri(pluginDefinition.getBasePlugin(), 'stateDiscovery', '/zosDiscovery/system/tn3270');
   }
 
   getAll(luname?:string): Observable<any> {
-    let result = this.http
-      .get(luname ? this.url+'?luname='+luname : this.url, this.getHeaders()).map((res:Response)=>res.json());
-    result.catch(this.handleError);
-
-    return result;
-  }
-
-  getHeaders(): RequestOptionsArgs {
-    let headers = new Headers();
-    let result: RequestOptionsArgs = {headers: headers};
-
-    headers.append('Accept', 'application/json');
-
-    return result;
+    return this.http.get(luname ? this.url+'?luname='+luname : this.url)
+    .pipe(catchError(this.handleError));
   }
   
   handleError(error: any): Observable<void> {
@@ -63,7 +52,7 @@ export class Terminal {
   constructor(
     private terminalElement: HTMLElement,
     private terminalParentElement: HTMLElement,
-    public http: Http,
+    public http: HttpClient,
     public pluginDefinition: ZLUX.ContainerPluginDefinition,
     private log: ZLUX.ComponentLogger
   ) { }

@@ -10,9 +10,8 @@
 
 import 'script-loader!./../lib/js/tn3270.js';
 import { AfterViewInit, OnDestroy, Component, ElementRef, Input, ViewChild, Inject, Optional } from '@angular/core';
-import {Http, Response} from '@angular/http';
-import {Observable} from 'rxjs/Rx';
-import 'rxjs/add/operator/map';
+import {HttpClient} from '@angular/common/http';
+import {Observable} from 'rxjs';
 declare var org_zowe_terminal_tn3270: any;
 
 import { Angular2InjectionTokens, Angular2PluginWindowActions, Angular2PluginViewportEvents, ContextMenuItem } from 'pluginlib/inject-resources';
@@ -95,7 +94,7 @@ export class AppComponent implements AfterViewInit {
   disableButton: boolean;
 
   constructor(
-    private http: Http,
+    private http: HttpClient,
     @Inject(Angular2InjectionTokens.LOGGER) private log: ZLUX.ComponentLogger,
     @Inject(Angular2InjectionTokens.PLUGIN_DEFINITION) private pluginDefinition: ZLUX.ContainerPluginDefinition,
     @Inject(Angular2InjectionTokens.VIEWPORT_EVENTS) private viewportEvents: Angular2PluginViewportEvents,
@@ -369,7 +368,20 @@ export class AppComponent implements AfterViewInit {
     if (this.windowActions) {
       this.windowActions.setTitle(`TN3270 - ${connectionSettings.host}:${connectionSettings.port}`);
     }
+    connectionSettings.charsetName = this.nameToCodepage(connectionSettings.charsetName);
     this.terminal.connectToHost(connectionSettings);
+  }
+
+  private nameToCodepage(name) {
+    const stringName = isNaN(Number(name)) ? name : ' '+name;
+    for (let i = 0; i < this.charsets.length; i++) {
+      console.log(this.charsets[i].name, stringName);
+      if (this.charsets[i].name.endsWith(stringName)) {
+        this.selectedCodepage = this.charsets[i].name;
+        return this.selectedCodepage;
+      }
+    }
+    return undefined;
   }
 
   //identical to isConnected for now, unless there's another reason to disable input
@@ -424,12 +436,11 @@ export class AppComponent implements AfterViewInit {
 
   loadConfig(): Observable<ConfigServiceTerminalConfig> {
     this.log.warn("Config load is wrong and not abstracted");
-    return this.http.get(ZoweZLUX.uriBroker.pluginConfigForScopeUri(this.pluginDefinition.getBasePlugin(),'instance','sessions','_defaultTN3270.json'))
-      .map((res: Response) => res.json());
+    return this.http.get<ConfigServiceTerminalConfig>(ZoweZLUX.uriBroker.pluginConfigForScopeUri(this.pluginDefinition.getBasePlugin(),'instance','sessions','_defaultTN3270.json'))
   }
 
   loadZssSettings(): Observable<ZssConfig> {
-    return this.http.get(ZoweZLUX.uriBroker.serverRootUri("server/proxies")).map((res: Response) => res.json());
+    return this.http.get<ZssConfig>(ZoweZLUX.uriBroker.serverRootUri("server/proxies"))
   }
 
   saveSettings() {
