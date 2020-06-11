@@ -32,7 +32,18 @@
   background-position: center;
 }
 
-.power-toggle {
+.save-button {
+  border-width: 1;
+  border-color: black;
+  font-size: 32px;
+  background: none;
+  border-radius: 4px;
+  margin: 0;
+  padding: 0;
+  display: grid;
+}
+
+.terminal-button {
   position: absolute;
   right: 0px;
   width: 38px;

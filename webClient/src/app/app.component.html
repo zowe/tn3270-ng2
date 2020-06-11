@@ -40,11 +40,8 @@
           <option value="5">Dynamic</option>
         </select>
       </div>      
-      <div class="power-toggle">
+      <div class="terminal-button">
         <button type="submit" class="power-toggle-button btn" [style.background-color]="powerButtonColor" [disabled]="disableButton" (click)="toggleConnection()"></button>
-      </div>
-      <div>
-        <button type="submit" (click)="saveSettings()"><div class="bookmark"><i class="fa fa-bookmark"></i></div></button>
       </div>
     </div>
     <div class="form-group row toolbar-row" style="width: 100%; height:40px">
@@ -61,7 +58,10 @@
         <select [(ngModel)]="selectedCodepage" [disabled]="isInputDisabled" class="form-control">
           <option [ngValue]="i.name" *ngFor="let i of charsets">{{i.name}}</option>
         </select>
-      </div>    
+      </div>
+      <button class="terminal-button save-button" type="submit" (click)="saveSettings()">
+        <i class="fa fa-save"></i>
+      </button>
     </div>
   </div>
   <div class="toolbar" *ngIf="errorMessage.length > 0" style="height:40px"> 
