@@ -14,7 +14,7 @@
       "imageSrc": "assets/icon.png"
     },
     "descriptionKey": "TN3270 Description",
-    "descriptionDefault": "TN3270 Terminal Emulator",
+    "descriptionDefault": "Basic TN3270 Display Emulator",
     "defaultWindowStyle": {
       "width": 800,
       "height": 600
