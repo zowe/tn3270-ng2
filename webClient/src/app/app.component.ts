@@ -10,9 +10,8 @@
 
 import 'script-loader!./../lib/js/tn3270.js';
 import { AfterViewInit, OnDestroy, Component, ElementRef, Input, ViewChild, Inject, Optional } from '@angular/core';
-import {Http, Response} from '@angular/http';
-import {Observable} from 'rxjs/Rx';
-import 'rxjs/add/operator/map';
+import {HttpClient} from '@angular/common/http';
+import {Observable} from 'rxjs';
 declare var org_zowe_terminal_tn3270: any;
 
 import { Angular2InjectionTokens, Angular2PluginWindowActions, Angular2PluginViewportEvents, ContextMenuItem } from 'pluginlib/inject-resources';
@@ -87,7 +86,7 @@ export class AppComponent implements AfterViewInit {
   row: number;
   column: number;
   charsets: Array<any> = org_zowe_terminal_tn3270.TERMINAL_DEFAULT_CHARSETS;
-  selectedCodepage: string = "International EBCDIC 1047";
+  selectedCodepage: string = "1047: International";
   terminalDivStyle: any;
   showMenu: boolean;
   private terminalHeightOffset: number = 0;
@@ -95,7 +94,7 @@ export class AppComponent implements AfterViewInit {
   disableButton: boolean;
 
   constructor(
-    private http: Http,
+    private http: HttpClient,
     @Inject(Angular2InjectionTokens.LOGGER) private log: ZLUX.ComponentLogger,
     @Inject(Angular2InjectionTokens.PLUGIN_DEFINITION) private pluginDefinition: ZLUX.ContainerPluginDefinition,
     @Inject(Angular2InjectionTokens.VIEWPORT_EVENTS) private viewportEvents: Angular2PluginViewportEvents,
@@ -187,6 +186,9 @@ export class AppComponent implements AfterViewInit {
         this.port = contents.port;
         this.securityType = contents.security.type;
         if (contents.deviceType) { this.modType = ''+contents.deviceType; }
+        if (this.modType === "5") {
+          this.isDynamic = true;
+        }
         if (contents.alternateHeight) { this.row = contents.alternateHeight; }
         if (contents.alternateWidth) { this.column = contents.alternateWidth; }
         if (contents.charsetName) { this.selectedCodepage = contents.charsetName; }
@@ -369,7 +371,19 @@ export class AppComponent implements AfterViewInit {
     if (this.windowActions) {
       this.windowActions.setTitle(`TN3270 - ${connectionSettings.host}:${connectionSettings.port}`);
     }
+    connectionSettings.charsetName = this.nameToCodepage(connectionSettings.charsetName);
     this.terminal.connectToHost(connectionSettings);
+  }
+
+  private nameToCodepage(name) {
+    const stringName = isNaN(Number(name)) ? name : ' '+name;
+    for (let i = 0; i < this.charsets.length; i++) {
+      if (this.charsets[i].name.startsWith(stringName+':')) {
+        this.selectedCodepage = this.charsets[i].name;
+        return this.selectedCodepage;
+      }
+    }
+    return undefined;
   }
 
   //identical to isConnected for now, unless there's another reason to disable input
@@ -424,12 +438,28 @@ export class AppComponent implements AfterViewInit {
 
   loadConfig(): Observable<ConfigServiceTerminalConfig> {
     this.log.warn("Config load is wrong and not abstracted");
-    return this.http.get(ZoweZLUX.uriBroker.pluginConfigForScopeUri(this.pluginDefinition.getBasePlugin(),'instance','sessions','_defaultTN3270.json'))
-      .map((res: Response) => res.json());
+    return this.http.get<ConfigServiceTerminalConfig>(ZoweZLUX.uriBroker.pluginConfigForScopeUri(this.pluginDefinition.getBasePlugin(),'user','sessions','_defaultTN3270.json'))
   }
 
   loadZssSettings(): Observable<ZssConfig> {
-    return this.http.get(ZoweZLUX.uriBroker.serverRootUri("server/proxies")).map((res: Response) => res.json());
+    return this.http.get<ZssConfig>(ZoweZLUX.uriBroker.serverRootUri("server/proxies"))
+  }
+
+  saveSettings() {
+    this.http.put(ZoweZLUX.uriBroker.pluginConfigForScopeUri(this.pluginDefinition.getBasePlugin(), 'user', 'sessions', '_defaultTN3270.json'),
+      {
+        deviceType: Number(this.modType),
+        alternateHeight: this.modType === "5" ? this.row : 24,
+        alternateWidth: this.modType === "5" ? this.column : 80,
+        security: {
+          type: this.securityType
+        },
+        port: this.port,
+        host: this.host,
+        charsetName: this.selectedCodepage
+      }).subscribe((result: any)=> {
+        this.log.debug('Save return');
+    });
   }
 }
 

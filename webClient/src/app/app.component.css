@@ -32,7 +32,18 @@
   background-position: center;
 }
 
-.power-toggle {
+.save-button {
+  border-width: 1;
+  border-color: black;
+  font-size: 32px;
+  background: none;
+  border-radius: 4px;
+  margin: 0;
+  padding: 0;
+  display: grid;
+}
+
+.terminal-button {
   position: absolute;
   right: 0px;
   width: 38px;
@@ -57,6 +68,15 @@
   background-size: 32px 32px;
   background-repeat: no-repeat;
   background-position: center;
+}
+
+.bookmark {
+  font-size: 24px;
+}
+
+.save-btn {
+  position: absolute;
+  right: 44px;
 }
 
 .toolbar-input {
