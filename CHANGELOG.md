@@ -1,5 +1,9 @@
 # Basic TN3270 Display Emulator Changelog
 
+## `0.11.1`
+
+- Bugfix: Codepage could not be set by the full strings such as "290: Japanese Katakana", but only by "290". Now, both are accepted.
+
 ## `0.11.0`
 
 - Added ability to save connection preferences on a per-user level via the floppy disk save icon
