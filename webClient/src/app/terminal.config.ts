@@ -51,6 +51,40 @@ export class ZssConfig {
   }
 }
 
+export class Keys {
+  constructor(
+    public normal?: string,
+    public special?: string,
+    public alt?: boolean,
+    public ctrl?: boolean,
+    public prompt?: string,
+    public mask?: boolean,
+  ){
+
+  }
+}
+
+export class KeySequence {
+  constructor(
+    public title?: string,
+    public description?: string,
+    public keys?: Keys[]
+  ) {
+
+  }
+}
+
+export class KeySequencesConfig {
+  constructor(
+    public _objectType: string,
+    public _metadataVersion: string,
+    public resource: string,
+    public contents: KeySequence[]
+  ){
+
+  }
+}
+
 /*
   This program and the accompanying materials are
   made available under the terms of the Eclipse Public License v2.0 which accompanies

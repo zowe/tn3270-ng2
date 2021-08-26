@@ -17,7 +17,7 @@ declare var org_zowe_terminal_tn3270: any;
 import { Angular2InjectionTokens, Angular2PluginWindowActions, Angular2PluginViewportEvents, ContextMenuItem } from 'pluginlib/inject-resources';
 
 import { Terminal, TerminalWebsocketError} from './terminal';
-import {ConfigServiceTerminalConfig, TerminalConfig, ZssConfig} from './terminal.config';
+import {ConfigServiceTerminalConfig, TerminalConfig, ZssConfig, KeySequencesConfig, KeySequence, Keys,} from './terminal.config';
 
 const TOGGLE_MENU_BUTTON_PX = 16; //with padding
 const CONFIG_MENU_ROW_PX = 40;
@@ -92,6 +92,8 @@ export class AppComponent implements AfterViewInit {
   private terminalHeightOffset: number = 0;
   private currentErrors: ErrorState = new ErrorState();
   disableButton: boolean;
+  keySequences: KeySequence[];
+  keySequencesLoaded: boolean = false;
 
   constructor(
     private http: HttpClient,
@@ -177,6 +179,17 @@ export class AppComponent implements AfterViewInit {
         this.windowActions.spawnContextMenu(info.x, info.y, menuItems);
       });
     }
+    this.loadKeySequencesConfig().subscribe((config: KeySequencesConfig) => {
+      if (config) {
+        this.keySequences = config.contents['keySequences'];
+        if (this.keySequences){
+          this.keySequencesLoaded = true;
+        }
+        for (const k in this.keySequences){
+          log.debug(`${k} => ${this.keySequences[k].title}`);
+        }
+      }
+    })
     this.terminal.wsErrorEmitter.subscribe((error: TerminalWebsocketError)=> this.onWSError(error));
     if (!this.connectionSettings) {
       this.loadConfig().subscribe((config: ConfigServiceTerminalConfig) => {
@@ -281,11 +294,12 @@ export class AppComponent implements AfterViewInit {
 
   toggleMenu(state:boolean): void {
     this.showMenu = state;
-    this.adjustTerminal(state ? CONFIG_MENU_SIZE_PX : -CONFIG_MENU_SIZE_PX);
+    let configRows: number = this.keySequencesLoaded ? 3 : 2;
+    this.adjustTerminal(state ? (configRows*CONFIG_MENU_ROW_PX + CONFIG_MENU_PAD_PX) : -(configRows*CONFIG_MENU_ROW_PX + CONFIG_MENU_PAD_PX));
   }
 
   private adjustTerminal(heightOffsetPx: number): void {
-    this.terminalHeightOffset += heightOffsetPx;    
+    this.terminalHeightOffset += heightOffsetPx;
     this.terminalDivStyle = {
       top: `${this.terminalHeightOffset}px`,
       height: `calc(100% - ${this.terminalHeightOffset}px)`
@@ -343,6 +357,53 @@ export class AppComponent implements AfterViewInit {
     });
   }
 
+  loadKeySequencesConfig(): Observable<KeySequencesConfig> {
+    return this.http.get<KeySequencesConfig>(ZoweZLUX.uriBroker.pluginConfigForScopeUri(this.pluginDefinition.getBasePlugin(),'user','sessions','_keySequences.json'))
+  }
+
+  async emulateKeyBoardEvent(keys: Keys){
+    let textAreaElement = document.querySelector('textArea#Input');
+    
+    if (keys.normal){
+      if (keys.mask){
+        this.log.debug(`Masked: ${'*'.repeat(keys.normal.length)} Ctrl(${keys.ctrl}) Alt(${keys.alt})`);
+      }
+      else {
+        this.log.debug(`Normal: ${keys.normal} Ctrl(${keys.ctrl}) Alt(${keys.alt})`);
+      }
+      for (let char = 0; char < keys.normal.length; char++){
+          textAreaElement.dispatchEvent(new KeyboardEvent('keydown',{'key': keys.normal[char], ctrlKey: keys.ctrl, altKey: keys.alt}));  
+      }
+      return;
+    }
+
+    if (keys.special){
+      this.log.debug(`Special: ${keys.special} Ctrl(${keys.ctrl}) Alt(${keys.alt})`);
+      textAreaElement.dispatchEvent(
+        new KeyboardEvent('keydown',{'key': keys.special, ctrlKey: keys.ctrl, altKey: keys.alt}));
+      if (keys.special === "Enter"){
+        await new Promise(f => setTimeout(f, 1000));
+      }
+      return;
+    }
+    
+    if (keys.prompt){
+      this.log.debug(`Prompt: ${keys.prompt} Ctrl(${keys.ctrl}) Alt(${keys.alt})`);
+      let promptValue = prompt(keys.prompt);
+      this.log.debug(`Value: ${promptValue}`);
+      for (let char = 0; char < promptValue.length; char++){
+        textAreaElement.dispatchEvent(new KeyboardEvent('keydown',{'key': promptValue[char]}));  
+      }
+    }
+    return;
+  }
+  
+  async keySequenceAction(keySequenceIndex: number) {
+    for (const k in this.keySequences[keySequenceIndex].keys){
+      await this.emulateKeyBoardEvent(this.keySequences[keySequenceIndex].keys[k]);
+    }
+  } 
+  
   toggleConnection(): void {
     if (this.terminal.isConnected()) {
       this.disconnectAndUnsetTitle();

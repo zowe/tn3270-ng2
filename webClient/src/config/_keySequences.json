@@ -1,0 +1,47 @@
+{"keySequences": [
+      {
+            "title": "Start",
+            "description": "ISPF: Start new ISPF panel",
+            "keys": [
+                  { "special":"Home"},
+                  { "normal": "E", "ctrl": "true"},
+                  { "normal":"START"},
+                  { "special":"Enter"}
+            ]
+      },
+      {
+            "title": "Swap next",
+            "description": "ISPF: Swap next command",
+            "keys": [
+                  { "special":"Home"},
+                  { "normal": "E", "ctrl": "true"},
+                  { "normal":"SWAP NEXT"},
+                  { "special":"Enter"}
+            ]
+      },
+      {
+            "title": "SrchFor",
+            "description": "ISPF: srchfor 'arg ...'",
+            "keys": [
+                  { "special":"Home"},
+                  { "normal": "E", "ctrl": "true"},
+                  { "normal":"srchfor '"},
+                  { "prompt": "String to find"},
+                  { "normal":"'"},
+                  { "special":"Enter"}
+            ]
+      },
+      {
+            "title": "Find&Hide",
+            "description": "ISPF: find string and hide the rest",
+            "keys": [
+                  { "special":"Home"},
+                  { "normal": "E", "ctrl": "true"},
+                  { "normal":"x all; find '"},
+                  { "prompt": "String to find"},
+                  { "normal":"' all; hide x"},
+                  { "special":"Enter"}
+            ]
+      }
+  ]
+}
