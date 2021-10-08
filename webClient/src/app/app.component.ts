@@ -18,6 +18,7 @@ import { Angular2InjectionTokens, Angular2PluginWindowActions, Angular2PluginVie
 
 import { Terminal, TerminalWebsocketError} from './terminal';
 import {ConfigServiceTerminalConfig, TerminalConfig, ZssConfig, KeySequencesConfig, KeySequence, Keys,} from './terminal.config';
+import { e } from '@angular/core/src/render3';
 
 const TOGGLE_MENU_BUTTON_PX = 16; //with padding
 const CONFIG_MENU_ROW_PX = 40;
@@ -362,7 +363,12 @@ export class AppComponent implements AfterViewInit {
   }
 
   async emulateKeyBoardEvent(keys: Keys){
-    let textAreaElement = document.querySelector('textArea#Input');
+    
+    let textAreaElement = this.terminalElementRef.nativeElement.querySelector('textArea#Input');
+    if (textAreaElement === null) {
+      this.log.debug("textArea#Input not found.");
+      return;
+    }
     
     if (keys.normal){
       if (keys.mask){
