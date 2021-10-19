@@ -17,9 +17,8 @@ declare var org_zowe_terminal_tn3270: any;
 import { Angular2InjectionTokens, Angular2PluginWindowActions, Angular2PluginViewportEvents, ContextMenuItem } from 'pluginlib/inject-resources';
 
 import { Terminal, TerminalWebsocketError} from './terminal';
-import {ConfigServiceTerminalConfig, TerminalConfig, ZssConfig, KeySequencesConfig, KeySequence, Keys,} from './terminal.config';
-import { e } from '@angular/core/src/render3';
-
+import { ConfigServiceTerminalConfig, TerminalConfig, ZssConfig, KeySequencesConfig, KeySequence, Keys } from './terminal.config';
+import { load } from '@angular/core/src/render3/instructions';
 const TOGGLE_MENU_BUTTON_PX = 16; //with padding
 const CONFIG_MENU_ROW_PX = 40;
 const CONFIG_MENU_PAD_PX = 4;
@@ -189,8 +188,10 @@ export class AppComponent implements AfterViewInit {
         for (const k in this.keySequences){
           log.debug(`${k} => ${this.keySequences[k].title}`);
         }
+      } else {
+        this.keySequencesLoaded = false;
       }
-    })
+    });
     this.terminal.wsErrorEmitter.subscribe((error: TerminalWebsocketError)=> this.onWSError(error));
     if (!this.connectionSettings) {
       this.loadConfig().subscribe((config: ConfigServiceTerminalConfig) => {
@@ -368,8 +369,8 @@ export class AppComponent implements AfterViewInit {
     if (textAreaElement === null) {
       this.log.debug("textArea#Input not found.");
       return;
-    }
-    
+    } 
+  
     if (keys.normal){
       if (keys.mask){
         this.log.debug(`Masked: ${'*'.repeat(keys.normal.length)} Ctrl(${keys.ctrl}) Alt(${keys.alt})`);
@@ -395,7 +396,7 @@ export class AppComponent implements AfterViewInit {
     
     if (keys.prompt){
       this.log.debug(`Prompt: ${keys.prompt} Ctrl(${keys.ctrl}) Alt(${keys.alt})`);
-      let promptValue = prompt(keys.prompt);
+      let promptValue = prompt(keys.prompt, "");
       this.log.debug(`Value: ${promptValue}`);
       for (let char = 0; char < promptValue.length; char++){
         textAreaElement.dispatchEvent(new KeyboardEvent('keydown',{'key': promptValue[char]}));  
@@ -410,6 +411,22 @@ export class AppComponent implements AfterViewInit {
     }
   } 
   
+  keySequenceReload(): void {
+    this.loadKeySequencesConfig().subscribe((config: KeySequencesConfig) => {
+      if (config) {
+        this.keySequences = config.contents['keySequences'];
+        if (this.keySequences){
+          this.keySequencesLoaded = true;
+        }
+        for (const k in this.keySequences){
+          this.log.debug(`${k} => ${this.keySequences[k].title}`);
+        }
+      } else {
+        this.keySequencesLoaded = false;
+      }
+    });
+  }
+
   toggleConnection(): void {
     if (this.terminal.isConnected()) {
       this.disconnectAndUnsetTitle();

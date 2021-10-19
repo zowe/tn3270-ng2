@@ -64,8 +64,18 @@
       </button>
     </div>
     <div class="form-group row toolbar-row" style="width: 100%; height:40px" *ngIf="keySequencesLoaded">
-      <div style="margin-top: 2px; margin-left: 15px; font-weight: bolder;" *ngFor="let k of keySequences; let i=index" (click)="keySequenceAction(i)" title="{{keySequences[i].description}}">
-        [{{keySequences[i].title}}]
+      <div 
+        style="margin-top: 2px; margin-left: 15px; font-weight: bolder; color: cornflowerblue;"
+        (click)="keySequenceReload()"
+        title="Reloads the key sequences config file.">
+          (Reload)
+      </div>
+      <div
+        style="margin-top: 2px; margin-left: 15px; font-weight: bolder;" 
+        *ngFor="let k of keySequences; let i=index"
+        (click)="keySequenceAction(i)"
+        title="{{keySequences[i].description}}">
+          [{{keySequences[i].title}}]
       </div>
     </div>
   </div>
