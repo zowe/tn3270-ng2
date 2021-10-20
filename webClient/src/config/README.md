@@ -4,7 +4,36 @@
 3. Build and upload the TN3270 to your runtime library
 4. Use Key sequences in the terminal
 
-**Note:** known bug: does not work properly for more TN3270 instances - key emulation is dispatched to ```textarea#input``` which is not unique and querySelector is always returning the first DOM element - will be fixed.
+## Key sequence config example
+```
+{"keySequences": [
+      { "title": "Title to be displayed",
+        "description": "Description of the command (hover help)",
+        "keys": [
+            { "normal": "NORMAL TEXT"},
+            { "special": "Home or Tab or Enter or F1..."},
+            { "normal": "X", "ctrl" : "true" },
+            { "prompt": "Enter your name" }
+        ]
+      },
+      { "title": "HELLO",
+        "description": "Types Hello, world!",
+        "keys": [
+            { "normal": "Hello, world!"},
+        ]
+      },
+      { "title": "Swap next",
+        "description": "ISPF: Swap next command",
+        "keys": [
+            { "special":"Home"},
+            { "normal": "E", "ctrl": "true"},
+            { "normal":"SWAP NEXT"},
+            { "special":"Enter"}
+        ]
+      },
+  ]
+}
+```
 
 ![tn3270](https://user-images.githubusercontent.com/66114686/130959163-8803acdb-af44-4b77-81f2-08b98054e3a1.png)
 
