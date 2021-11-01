@@ -60,7 +60,7 @@
 ```
 
 ## Latest updates
-* Separated connection and key sequnce menu
+* Separated connection and key sequence menu
 * Reload button to refresh the key sequences (e.g. if key sequnces config was edited)
 * Warning when combination of normal, special and prompt definition used (key action is partially processed)
 * Buttons highlighting
