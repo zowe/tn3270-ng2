@@ -65,5 +65,6 @@
 * Warning when combination of normal, special and prompt definition used (key action is partially processed)
 * Buttons highlighting
 
-![tn3270](https://user-images.githubusercontent.com/66114686/130959163-8803acdb-af44-4b77-81f2-08b98054e3a1.png)
+![image](https://user-images.githubusercontent.com/66114686/139689329-3ade09ce-fb2a-42cf-a934-66f1d5bd1904.png)
+
 
