@@ -13,7 +13,7 @@
 
 
 .toggle-menu {
-  width: 100%;
+  width: 50%;
   height: 14px;
   padding-top: 0;
   padding-bottom: 0;
@@ -26,6 +26,7 @@
   background-repeat: no-repeat;
   background-position: center;
 }
+
 .contract-menu {
   background: url(../assets/contract.png);
   background-repeat: no-repeat;
@@ -103,6 +104,29 @@
   color: #bf3030;
   margin-left: 15px;
 }
+
+.key-sequence {
+  margin-top: 1px;
+  margin-left: 15px;
+  font-weight: bolder;
+}
+
+.key-sequence-action {
+  color: black;
+}
+
+.key-sequence-menu {
+  color: green;
+}
+
+.key-sequence-warning {
+  color: orangered;
+}
+
+.key-sequence-action:hover {
+  background: darkgray;
+}
+
 
 /*
   This program and the accompanying materials are

@@ -17,12 +17,11 @@ declare var org_zowe_terminal_tn3270: any;
 import { Angular2InjectionTokens, Angular2PluginWindowActions, Angular2PluginViewportEvents, ContextMenuItem } from 'pluginlib/inject-resources';
 
 import { Terminal, TerminalWebsocketError} from './terminal';
-import { ConfigServiceTerminalConfig, TerminalConfig, ZssConfig, KeySequencesConfig, KeySequence, Keys } from './terminal.config';
-import { load } from '@angular/core/src/render3/instructions';
+import { ConfigServiceTerminalConfig, ZssConfig, KeySequencesConfig, KeySequence, Keys } from './terminal.config';
+import { ThrowStmt } from '@angular/compiler';
 const TOGGLE_MENU_BUTTON_PX = 16; //with padding
 const CONFIG_MENU_ROW_PX = 40;
 const CONFIG_MENU_PAD_PX = 4;
-const CONFIG_MENU_SIZE_PX = (CONFIG_MENU_ROW_PX*2)+CONFIG_MENU_PAD_PX; //40 per row, plus 2 px padding
 
 enum ErrorType {
   host,
@@ -88,7 +87,8 @@ export class AppComponent implements AfterViewInit {
   charsets: Array<any> = org_zowe_terminal_tn3270.TERMINAL_DEFAULT_CHARSETS;
   selectedCodepage: string = "1047: International";
   terminalDivStyle: any;
-  showMenu: boolean;
+  showConnectionMenu: boolean;
+  showKeySequencesMenu: boolean;
   private terminalHeightOffset: number = 0;
   private currentErrors: ErrorState = new ErrorState();
   disableButton: boolean;
@@ -294,10 +294,22 @@ export class AppComponent implements AfterViewInit {
     }    
   }  
 
-  toggleMenu(state:boolean): void {
-    this.showMenu = state;
-    let configRows: number = this.keySequencesLoaded ? 3 : 2;
-    this.adjustTerminal(state ? (configRows*CONFIG_MENU_ROW_PX + CONFIG_MENU_PAD_PX) : -(configRows*CONFIG_MENU_ROW_PX + CONFIG_MENU_PAD_PX));
+  toggleMenu(state:boolean, menuID:string): void {
+    let rows : number; 
+    let menuPadding : number;
+
+    if (menuID === "connectionMenu") {
+      this.showConnectionMenu = state;
+      rows = 2;
+      menuPadding = this.showKeySequencesMenu ? 0 : 1;
+    }
+    if (menuID === "keySequencesMenu") {
+      this.showKeySequencesMenu = state;
+      rows = 1;
+      menuPadding = this.showConnectionMenu ? 0 : 1;
+    }
+    
+    this.adjustTerminal(state ? (rows*CONFIG_MENU_ROW_PX + menuPadding * CONFIG_MENU_PAD_PX) : -(rows*CONFIG_MENU_ROW_PX + menuPadding * CONFIG_MENU_PAD_PX));
   }
 
   private adjustTerminal(heightOffsetPx: number): void {
@@ -363,6 +375,13 @@ export class AppComponent implements AfterViewInit {
     return this.http.get<KeySequencesConfig>(ZoweZLUX.uriBroker.pluginConfigForScopeUri(this.pluginDefinition.getBasePlugin(),'user','sessions','_keySequences.json'))
   }
 
+  logKeySequncesDebug(keys: Keys){
+    let debugPrexix = keys.normal ? `Normal: ${keys.normal}` : keys.special ? `Special : ${keys.special}` : keys.prompt ? `Prompt : ${keys.prompt}` : null;
+    if (debugPrexix){
+      this.log.debug(`${debugPrexix} Ctrl(${keys.ctrl}) Alt(${keys.alt}) Shift(${keys.shift})`);
+    }    
+  }
+
   async emulateKeyBoardEvent(keys: Keys){
     
     let textAreaElement = this.terminalElementRef.nativeElement.querySelector('textArea#Input');
@@ -370,24 +389,22 @@ export class AppComponent implements AfterViewInit {
       this.log.debug("textArea#Input not found.");
       return;
     } 
-  
+    
+    if (((keys.normal ? 1 : 0) ^ (keys.special ? 1 : 0) ^ (keys.prompt ? 1 : 0)) === 0){
+      this.log.warn("Combination of 'normal', 'special' and 'propmt' found. Only one action will be processed in order 'normal', 'special' and 'prompt'.");
+    }
+
     if (keys.normal){
-      if (keys.mask){
-        this.log.debug(`Masked: ${'*'.repeat(keys.normal.length)} Ctrl(${keys.ctrl}) Alt(${keys.alt})`);
-      }
-      else {
-        this.log.debug(`Normal: ${keys.normal} Ctrl(${keys.ctrl}) Alt(${keys.alt})`);
-      }
+      this.logKeySequncesDebug(keys);
       for (let char = 0; char < keys.normal.length; char++){
-          textAreaElement.dispatchEvent(new KeyboardEvent('keydown',{'key': keys.normal[char], ctrlKey: keys.ctrl, altKey: keys.alt}));  
+        textAreaElement.dispatchEvent(new KeyboardEvent('keydown',{'key': keys.normal[char], shiftKey: keys.shift, ctrlKey: keys.ctrl, altKey: keys.alt}));  
       }
       return;
     }
 
     if (keys.special){
-      this.log.debug(`Special: ${keys.special} Ctrl(${keys.ctrl}) Alt(${keys.alt})`);
-      textAreaElement.dispatchEvent(
-        new KeyboardEvent('keydown',{'key': keys.special, ctrlKey: keys.ctrl, altKey: keys.alt}));
+      this.logKeySequncesDebug(keys);
+      textAreaElement.dispatchEvent(new KeyboardEvent('keydown',{'key': keys.special, shiftKey: keys.shift, ctrlKey: keys.ctrl, altKey: keys.alt}));
       if (keys.special === "Enter"){
         await new Promise(f => setTimeout(f, 1000));
       }
@@ -395,7 +412,7 @@ export class AppComponent implements AfterViewInit {
     }
     
     if (keys.prompt){
-      this.log.debug(`Prompt: ${keys.prompt} Ctrl(${keys.ctrl}) Alt(${keys.alt})`);
+      this.logKeySequncesDebug(keys);
       let promptValue = prompt(keys.prompt, "");
       this.log.debug(`Value: ${promptValue}`);
       for (let char = 0; char < promptValue.length; char++){

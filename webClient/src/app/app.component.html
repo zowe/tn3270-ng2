@@ -11,9 +11,13 @@
 -->
 
 <div class="tn3270-parent" #terminalParent>
-  <button class="toggle-menu expand-menu" *ngIf="!showMenu" type="submit" (click)="toggleMenu(true)"></button>
-  <button class="toggle-menu contract-menu" *ngIf="showMenu" type="submit" (click)="toggleMenu(false)"></button>
-  <div *ngIf="showMenu" class="toolbar">
+
+  <button class="toggle-menu expand-menu" *ngIf="!showConnectionMenu" type="submit" (click)="toggleMenu(true, 'connectionMenu')" title="Connection setting"></button>
+  <button class="toggle-menu contract-menu" *ngIf="showConnectionMenu" type="submit" (click)="toggleMenu(false, 'connectionMenu')" title="Hide"></button>
+  <button class="toggle-menu expand-menu" *ngIf="!showKeySequencesMenu" type="submit" (click)="toggleMenu(true, 'keySequencesMenu')" title="Key Sequences"></button>
+  <button class="toggle-menu contract-menu" *ngIf="showKeySequencesMenu" type="submit" (click)="toggleMenu(false, 'keySequencesMenu')" title="Hide"></button> 
+
+  <div *ngIf="showConnectionMenu" class="toolbar" title="Connection setting">
     <div class="form-group row toolbar-row">
       <label class="col-sm-1 col-form-label">Host</label>
       <div class="toolbar-input col-sm-2">
@@ -63,20 +67,29 @@
         <i class="fa fa-save"></i>
       </button>
     </div>
-    <div class="form-group row toolbar-row" style="width: 100%; height:40px" *ngIf="keySequencesLoaded">
+  </div>
+  <div class="toolbar" style="width: 100%; height:40px" *ngIf="showKeySequencesMenu" title="Key sequences">
+    <div class="form-group row toolbar-row">
       <div 
-        style="margin-top: 2px; margin-left: 15px; font-weight: bolder; color: cornflowerblue;"
+        class="key-sequence key-sequence-menu"
         (click)="keySequenceReload()"
         title="Reloads the key sequences config file.">
           (Reload)
       </div>
-      <div
-        style="margin-top: 2px; margin-left: 15px; font-weight: bolder;" 
-        *ngFor="let k of keySequences; let i=index"
-        (click)="keySequenceAction(i)"
-        title="{{keySequences[i].description}}">
-          [{{keySequences[i].title}}]
-      </div>
+      <ng-container *ngIf="keySequencesLoaded">
+        <div 
+          class="key-sequence key-sequence-action" 
+          *ngFor="let k of keySequences; let i=index"
+          (click)="keySequenceAction(i)"
+          title="{{keySequences[i].description}}">
+            [{{keySequences[i].title}}]
+        </div>
+      </ng-container>
+      <ng-container *ngIf="!keySequencesLoaded">
+        <div class="key-sequence key-sequence-warning">
+          No key sequences definitions found.
+        </div>
+      </ng-container>
     </div>
   </div>
   <div class="toolbar" *ngIf="errorMessage.length > 0" style="height:40px"> 

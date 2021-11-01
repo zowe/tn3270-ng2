@@ -55,10 +55,10 @@ export class Keys {
   constructor(
     public normal?: string,
     public special?: string,
-    public alt?: boolean,
-    public ctrl?: boolean,
     public prompt?: string,
-    public mask?: boolean,
+    public ctrl?: boolean,
+    public alt?: boolean,
+    public shift?: boolean,
   ){
 
   }
@@ -66,7 +66,7 @@ export class Keys {
 
 export class KeySequence {
   constructor(
-    public title?: string,
+    public title: string,
     public description?: string,
     public keys?: Keys[]
   ) {

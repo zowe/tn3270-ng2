@@ -6,34 +6,64 @@
 
 ## Key sequence config example
 ```
-{"keySequences": [
-      { "title": "Title to be displayed",
-        "description": "Description of the command (hover help)",
-        "keys": [
-            { "normal": "NORMAL TEXT"},
-            { "special": "Home or Tab or Enter or F1..."},
-            { "normal": "X", "ctrl" : "true" },
-            { "prompt": "Enter your name" }
-        ]
+{
+   "keySequences":[
+      {
+         "title":"Title to be displayed",
+         "description":"Description of the command (hover help)",
+         "keys":[
+            {
+               "normal":"NORMAL TEXT"
+            },
+            {
+               "special":"Home or Tab or Enter or F1..."
+            },
+            {
+               "normal":"X",
+               "ctrl":"true"
+            },
+            {
+               "prompt":"Enter your name"
+            }
+         ]
       },
-      { "title": "HELLO",
-        "description": "Types Hello, world!",
-        "keys": [
-            { "normal": "Hello, world!"},
-        ]
+      {
+         "title":"HELLO",
+         "description":"Types Hello, world!",
+         "keys":[
+            {
+               "normal":"Hello, world!"
+            }
+         ]
       },
-      { "title": "Swap next",
-        "description": "ISPF: Swap next command",
-        "keys": [
-            { "special":"Home"},
-            { "normal": "E", "ctrl": "true"},
-            { "normal":"SWAP NEXT"},
-            { "special":"Enter"}
-        ]
-      },
-  ]
+      {
+         "title":"Swap next",
+         "description":"ISPF: Swap next command",
+         "keys":[
+            {
+               "special":"Home"
+            },
+            {
+               "normal":"E",
+               "ctrl":"true"
+            },
+            {
+               "normal":"SWAP NEXT"
+            },
+            {
+               "special":"Enter"
+            }
+         ]
+      }
+   ]
 }
 ```
+
+## Latest updates
+* Separated connection and key sequnce menu
+* Reload button to refresh the key sequences (e.g. if key sequnces config was edited)
+* Warning when combination of normal, special and prompt definition used (key action is partially processed)
+* Buttons highlighting
 
 ![tn3270](https://user-images.githubusercontent.com/66114686/130959163-8803acdb-af44-4b77-81f2-08b98054e3a1.png)
 
