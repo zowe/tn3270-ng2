@@ -2,24 +2,26 @@
   This program and the accompanying materials are
   made available under the terms of the Eclipse Public License v2.0 which accompanies
   this distribution, and is available at https://www.eclipse.org/legal/epl-v20.html
-  
+
   SPDX-License-Identifier: EPL-2.0
-  
+
   Copyright Contributors to the Zowe Project.
 */
 
 import 'script-loader!./../lib/js/tn3270.js';
 import { AfterViewInit, OnDestroy, Component, ElementRef, Input, ViewChild, Inject, Optional } from '@angular/core';
-import {HttpClient} from '@angular/common/http';
-import {Observable} from 'rxjs';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs/internal/Observable';
 declare var org_zowe_terminal_tn3270: any;
 
-import { Angular2InjectionTokens, Angular2PluginWindowActions, Angular2PluginViewportEvents, ContextMenuItem } from 'pluginlib/inject-resources';
+import {
+  Angular2InjectionTokens, Angular2PluginWindowActions, Angular2PluginViewportEvents, ContextMenuItem
+ } from 'pluginlib/inject-resources';
 
 import { Terminal, TerminalWebsocketError} from './terminal';
 import { ConfigServiceTerminalConfig, ZssConfig, KeySequencesConfig, KeySequence, Keys } from './terminal.config';
 import { ThrowStmt } from '@angular/compiler';
-const TOGGLE_MENU_BUTTON_PX = 16; //with padding
+const TOGGLE_MENU_BUTTON_PX = 16; // With padding
 const CONFIG_MENU_ROW_PX = 40;
 const CONFIG_MENU_PAD_PX = 4;
 
@@ -34,11 +36,11 @@ enum ErrorType {
 class ErrorState {
   private stateArray: Array<string|null> = new Array<string|null>();
 
-  set(type: ErrorType, message: string|null) {
+  set(type: ErrorType, message: string|null): void {
     this.stateArray[type] = message;
   }
 
-  get(type:ErrorType): string|null {
+  get(type: ErrorType): string|null {
     return this.stateArray[type];
   }
 
@@ -46,9 +48,9 @@ class ErrorState {
     this.stateArray.fill(null);
   }
 
-  //should it block connection
+  // Should it block connection
   isStateBlocking(): boolean {
-    if (this.stateArray[ErrorType.host] || this.stateArray[ErrorType.port] || this.stateArray[ErrorType.dimension] ){
+    if (this.stateArray[ErrorType.host] || this.stateArray[ErrorType.port] || this.stateArray[ErrorType.dimension] ) {
       return true;
     }
     return false;
@@ -75,25 +77,25 @@ export class AppComponent implements AfterViewInit {
   @ViewChild('terminalParent')
   terminalParentElementRef: ElementRef;
   terminal: Terminal;
-  host:string;
-  port:number;
-  securityType:string;
+  host: string;
+  port: number;
+  securityType: string;
   modType: string;
   connectionSettings: any;
-  errorMessage: string = '';
+  errorMessage = '';
   isDynamic: boolean;
   row: number;
   column: number;
   charsets: Array<any> = org_zowe_terminal_tn3270.TERMINAL_DEFAULT_CHARSETS;
-  selectedCodepage: string = "1047: International";
+  selectedCodepage = '1047: International';
   terminalDivStyle: any;
   showConnectionMenu: boolean;
   showKeySequencesMenu: boolean;
-  private terminalHeightOffset: number = 0;
+  private terminalHeightOffset = 0;
   private currentErrors: ErrorState = new ErrorState();
   disableButton: boolean;
   keySequences: KeySequence[];
-  keySequencesLoaded: boolean = false;
+  keySequencesLoaded = false;
 
   constructor(
     private http: HttpClient,
@@ -103,19 +105,19 @@ export class AppComponent implements AfterViewInit {
     @Optional() @Inject(Angular2InjectionTokens.WINDOW_ACTIONS) private windowActions: Angular2PluginWindowActions,
     @Inject(Angular2InjectionTokens.LAUNCH_METADATA) private launchMetadata: any,
   ) {
-    this.log.info('Recvd launch metadata='+JSON.stringify(launchMetadata));
+    this.log.info('Recvd launch metadata=' + JSON.stringify(launchMetadata));
     if (launchMetadata != null && launchMetadata.data) {
       switch (launchMetadata.data.type) {
-      case "connect":
+      case 'connect':
         if (launchMetadata.data.connectionSettings) {
-          let cs = launchMetadata.data.connectionSettings;
+          const cs = launchMetadata.data.connectionSettings;
           this.host = cs.host;
           this.port = cs.port;
-          this.modType = ""+cs.deviceType;
-          if (cs.security && cs.security.type){
-            this.securityType = ""+cs.security.type;
+          this.modType = '' + cs.deviceType;
+          if (cs.security && cs.security.type) {
+            this.securityType = '' + cs.security.type;
           }
-          if (this.modType === "5") {
+          if (this.modType === '5') {
             this.isDynamic = true;
             this.row = cs.alternateHeight ? cs.alternateHeight : 24;
             this.column = cs.alternateWidth ? cs.alternateWidth : 80;
@@ -124,75 +126,63 @@ export class AppComponent implements AfterViewInit {
         }
         break;
       default:
-        
+
       }
     }
     this.adjustTerminal(TOGGLE_MENU_BUTTON_PX);
 
-    //defaulting initializations
-    if (!this.host) this.host = "localhost";
-    if (!this.port) this.port = 23;
-    if (!this.modType) this.modType = "1";
-    if (!this.securityType) this.securityType = "telnet";
-    if (!this.row) this.row = 24;
-    if (!this.column) this.column = 80;
+    // Defaulting initializations
+    if (!this.host) { this.host = 'localhost'; }
+    if (!this.port) { this.port = 23; }
+    if (!this.modType) { this.modType = '1'; }
+    if (!this.securityType) { this.securityType = 'telnet'; }
+    if (!this.row) { this.row = 24; }
+    if (!this.column) { this.column = 80; }
   }
 
   ngOnInit(): void {
-    this.viewportEvents.registerCloseHandler(():Promise<void>=> {
-      return new Promise((resolve,reject)=> {
+    this.viewportEvents.registerCloseHandler((): Promise<void> => {
+      return new Promise((resolve, reject) => {
         this.ngOnDestroy();
         resolve();
       });
     });
   }
-  
-  modTypeChange(value:string): void {
-    this.isDynamic = (value === "5");
+
+  modTypeChange(value: string): void {
+    this.isDynamic = (value === '5');
   }
 
   ngAfterViewInit(): void {
-    let log:ZLUX.ComponentLogger = this.log;
+    const log: ZLUX.ComponentLogger = this.log;
     log.debug('START: Tn3270 ngAfterViewInit');
-    let dispatcher: ZLUX.Dispatcher = ZoweZLUX.dispatcher; 
+    const dispatcher: ZLUX.Dispatcher = ZoweZLUX.dispatcher;
     const terminalElement = this.terminalElementRef.nativeElement;
     const terminalParentElement = this.terminalParentElementRef.nativeElement;
     this.terminal = new Terminal(terminalElement, terminalParentElement, this.http, this.pluginDefinition, this.log);
     this.viewportEvents.resized.subscribe(() => this.terminal.performResize());
     if (this.windowActions) {
       this.terminal.contextMenuEmitter.subscribe( (info) => {
-        let screenContext:any = info.screenContext;
-        screenContext["sourcePluginID"] = this.pluginDefinition.getBasePlugin().getIdentifier();
-        let recognizers:any[] = dispatcher.getRecognizers(screenContext);
-        let menuItems:ContextMenuItem[] = [];
-        for (let recognizer of recognizers){
-          let action = dispatcher.getAction(recognizer);
-          log.debug("Recognizer="+JSON.stringify(recognizer)+" action="+action);
-          if (action){
-            let menuCallback = () => {
-              dispatcher.invokeAction(action,info.screenContext);
+        const screenContext: any = info.screenContext;
+        screenContext['sourcePluginID'] = this.pluginDefinition.getBasePlugin().getIdentifier();
+        const recognizers: any[] = dispatcher.getRecognizers(screenContext);
+        const menuItems: ContextMenuItem[] = [];
+        for (const recognizer of recognizers) {
+          const action = dispatcher.getAction(recognizer);
+          log.debug('Recognizer=' + JSON.stringify(recognizer) + ' action=' + action);
+          if (action) {
+            const menuCallback = () => {
+              dispatcher.invokeAction(action, info.screenContext);
             }
-            // menu items can also have children
+            // Menu items can also have children
             menuItems.push({text: action.getDefaultName(), action: menuCallback});
           }
         }
         this.windowActions.spawnContextMenu(info.x, info.y, menuItems);
       });
     }
-    this.loadKeySequencesConfig().subscribe((config: KeySequencesConfig) => {
-      if (config) {
-        this.keySequences = config.contents['keySequences'];
-        if (this.keySequences){
-          this.keySequencesLoaded = true;
-        }
-        for (const k in this.keySequences){
-          log.debug(`${k} => ${this.keySequences[k].title}`);
-        }
-      } else {
-        this.keySequencesLoaded = false;
-      }
-    });
-    this.terminal.wsErrorEmitter.subscribe((error: TerminalWebsocketError)=> this.onWSError(error));
+    this.keySequencesReload();
+    this.terminal.wsErrorEmitter.subscribe((error: TerminalWebsocketError) => this.onWSError(error));
     if (!this.connectionSettings) {
       this.loadConfig().subscribe((config: ConfigServiceTerminalConfig) => {
 
@@ -200,8 +190,8 @@ export class AppComponent implements AfterViewInit {
         this.host = contents.host;
         this.port = contents.port;
         this.securityType = contents.security.type;
-        if (contents.deviceType) { this.modType = ''+contents.deviceType; }
-        if (this.modType === "5") {
+        if (contents.deviceType) { this.modType = '' + contents.deviceType; }
+        if (this.modType === '5') {
           this.isDynamic = true;
         }
         if (contents.alternateHeight) { this.row = contents.alternateHeight; }
@@ -250,26 +240,26 @@ export class AppComponent implements AfterViewInit {
   }
 
   private onWSError(error: TerminalWebsocketError): void {
-    let message = "Terminal closed due to websocket error. Code="+error.code;
-    this.log.warn(message+", Reason="+error.reason);
+    const message = 'Terminal closed due to websocket error. Code=' + error.code;
+    this.log.warn(message + ', Reason=' + error.reason);
     this.setError(ErrorType.websocket, message);
     this.disconnectAndUnsetTitle();
   }
 
-  private setError(type: ErrorType, message: string):void {
+  private setError(type: ErrorType, message: string): void {
     this.currentErrors.set(type, message);
     this.refreshErrorBar();
   }
 
-  private clearError(type: ErrorType):void {
-    let hadError = this.currentErrors.get(type);
+  private clearError(type: ErrorType): void {
+    const hadError = this.currentErrors.get(type);
     this.currentErrors.set(type, null);
     if (hadError) {
       this.refreshErrorBar();
     }
   }
 
-  private clearAllErrors():void {
+  private clearAllErrors(): void {
     this.currentErrors.clear();
     if (this.errorMessage.length > 0) {
       this.refreshErrorBar();
@@ -277,9 +267,9 @@ export class AppComponent implements AfterViewInit {
   }
 
   private refreshErrorBar(): void {
-    let error = this.currentErrors.getFirstError();
+    const error = this.currentErrors.getFirstError();
 
-    let hadError = this.errorMessage.length > 0;
+    const hadError = this.errorMessage.length > 0;
     if (error) {
       this.errorMessage = error;
       this.disableButton = this.currentErrors.isStateBlocking() ? true : false;
@@ -289,27 +279,28 @@ export class AppComponent implements AfterViewInit {
     }
 
     if ((error && !hadError) || (!error && hadError)) {
-      let offset: number = error ? CONFIG_MENU_ROW_PX : -CONFIG_MENU_ROW_PX;
+      const offset: number = error ? CONFIG_MENU_ROW_PX : -CONFIG_MENU_ROW_PX;
       this.adjustTerminal(offset);
-    }    
-  }  
+    }
+  }
 
-  toggleMenu(state:boolean, menuID:string): void {
-    let rows : number; 
-    let menuPadding : number;
+  toggleMenu(state: boolean, menuID: string): void {
+    let rows: number;
+    let menuPadding: number;
 
-    if (menuID === "connectionMenu") {
+    if (menuID === 'connectionMenu') {
       this.showConnectionMenu = state;
       rows = 2;
       menuPadding = this.showKeySequencesMenu ? 0 : 1;
     }
-    if (menuID === "keySequencesMenu") {
+    if (menuID === 'keySequencesMenu') {
       this.showKeySequencesMenu = state;
       rows = 1;
       menuPadding = this.showConnectionMenu ? 0 : 1;
     }
-    
-    this.adjustTerminal(state ? (rows*CONFIG_MENU_ROW_PX + menuPadding * CONFIG_MENU_PAD_PX) : -(rows*CONFIG_MENU_ROW_PX + menuPadding * CONFIG_MENU_PAD_PX));
+    this.adjustTerminal(state ?
+      (rows * CONFIG_MENU_ROW_PX + menuPadding * CONFIG_MENU_PAD_PX) : -(rows * CONFIG_MENU_ROW_PX + menuPadding * CONFIG_MENU_PAD_PX)
+    );
   }
 
   private adjustTerminal(heightOffsetPx: number): void {
@@ -319,15 +310,15 @@ export class AppComponent implements AfterViewInit {
       height: `calc(100% - ${this.terminalHeightOffset}px)`
     };
     if (this.terminal) {
-      setTimeout(()=> {
+      setTimeout(() => {
         this.terminal.performResize();
-      },100);
+      }, 100);
     }
   }
 
   /* I expect a JSON here*/
   zluxOnMessage(eventContext: any): Promise<any> {
-    return new Promise((resolve,reject)=> {
+    return new Promise((resolve, reject) => {
       if (!eventContext || !eventContext.data) {
         return reject('Event context missing or malformed');
       }
@@ -336,14 +327,14 @@ export class AppComponent implements AfterViewInit {
         resolve(this.disconnectAndUnsetTitle());
         break;
       case 'connectionInfo':
-        let hostInfo = this.terminal.virtualScreen.hostInfo;
-        this.log.debug('Hostinfo='+JSON.stringify(hostInfo));
+        const hostInfo = this.terminal.virtualScreen.hostInfo;
+        this.log.debug('Hostinfo=' + JSON.stringify(hostInfo));
         resolve(hostInfo);
         break;
       default:
         reject('Event context missing or unknown data.type');
       };
-    });    
+    });
   }
 
 
@@ -351,18 +342,18 @@ export class AppComponent implements AfterViewInit {
     return {
       onMessage: (eventContext: any): Promise<any> => {
         return this.zluxOnMessage(eventContext);
-      }      
+      }
     }
   }
 
   checkZssProxy(): Promise<any> {
     return new Promise((resolve, reject) => {
-      if (this.host === "") {
+      if (this.host === '') {
         this.loadZssSettings().subscribe((zssSettings: ZssConfig) => {
           this.host = zssSettings.zssServerHostName;
           resolve(this.host);
         }, () => {
-          this.setError(ErrorType.host, "Invalid Hostname: \"" + this.host + "\".")
+          this.setError(ErrorType.host, 'Invalid Hostname: \"' + this.host + '\".')
           reject(this.host)
         });
       } else {
@@ -372,71 +363,85 @@ export class AppComponent implements AfterViewInit {
   }
 
   loadKeySequencesConfig(): Observable<KeySequencesConfig> {
-    return this.http.get<KeySequencesConfig>(ZoweZLUX.uriBroker.pluginConfigForScopeUri(this.pluginDefinition.getBasePlugin(),'user','sessions','_keySequences.json'))
+    return this.http.get<KeySequencesConfig>(
+      ZoweZLUX.uriBroker.pluginConfigForScopeUri(this.pluginDefinition.getBasePlugin(), 'user', 'sessions', '_keySequences.json')
+    )
   }
 
-  logKeySequncesDebug(keys: Keys){
-    let debugPrexix = keys.normal ? `Normal: ${keys.normal}` : keys.special ? `Special : ${keys.special}` : keys.prompt ? `Prompt : ${keys.prompt}` : null;
-    if (debugPrexix){
+  keySequncesLogDebug(keys: Keys): void {
+    const debugPrexix = keys.normal ? `Normal: ${keys.normal}` :
+      keys.special ? `Special : ${keys.special}` :
+      keys.prompt ? `Prompt : ${keys.prompt}` : null;
+    if (debugPrexix) {
       this.log.debug(`${debugPrexix} Ctrl(${keys.ctrl}) Alt(${keys.alt}) Shift(${keys.shift})`);
-    }    
+    }
   }
 
-  async emulateKeyBoardEvent(keys: Keys){
-    
-    let textAreaElement = this.terminalElementRef.nativeElement.querySelector('textArea#Input');
+  async emulateKeyBoardEvent(keys: Keys): Promise<void> {
+
+    const textAreaElement = this.terminalElementRef.nativeElement.querySelector('textArea#Input');
     if (textAreaElement === null) {
-      this.log.debug("textArea#Input not found.");
+      this.log.warn('textArea#Input not found.');
       return;
-    } 
-    
-    if (((keys.normal ? 1 : 0) ^ (keys.special ? 1 : 0) ^ (keys.prompt ? 1 : 0)) === 0){
-      this.log.warn("Combination of 'normal', 'special' and 'propmt' found. Only one action will be processed in order 'normal', 'special' and 'prompt'.");
     }
 
-    if (keys.normal){
-      this.logKeySequncesDebug(keys);
-      for (let char = 0; char < keys.normal.length; char++){
-        textAreaElement.dispatchEvent(new KeyboardEvent('keydown',{'key': keys.normal[char], shiftKey: keys.shift, ctrlKey: keys.ctrl, altKey: keys.alt}));  
+    if ([keys.normal, keys.special, keys.prompt].filter(Boolean).length > 1) {
+      this.log.warn('Combination of \'normal\', \'special\' and \'propmt\' found. \
+        Only one action will be processed in order \'normal\', \'special\' and \'prompt\'.'
+      );
+    }
+
+    if (keys.normal) {
+      this.keySequncesLogDebug(keys);
+      for (let char = 0; char < keys.normal.length; char++) {
+        textAreaElement.dispatchEvent(
+          new KeyboardEvent('keydown', {'key': keys.normal[char], shiftKey: keys.shift, ctrlKey: keys.ctrl, altKey: keys.alt})
+        );
       }
       return;
     }
 
-    if (keys.special){
-      this.logKeySequncesDebug(keys);
-      textAreaElement.dispatchEvent(new KeyboardEvent('keydown',{'key': keys.special, shiftKey: keys.shift, ctrlKey: keys.ctrl, altKey: keys.alt}));
-      if (keys.special === "Enter"){
+    if (keys.special) {
+      this.keySequncesLogDebug(keys);
+      textAreaElement.dispatchEvent(
+        new KeyboardEvent('keydown', {'key': keys.special, shiftKey: keys.shift, ctrlKey: keys.ctrl, altKey: keys.alt})
+      );
+      if (keys.special === 'Enter') {
         await new Promise(f => setTimeout(f, 1000));
       }
       return;
     }
-    
-    if (keys.prompt){
-      this.logKeySequncesDebug(keys);
-      let promptValue = prompt(keys.prompt, "");
+
+    if (keys.prompt) {
+      this.keySequncesLogDebug(keys);
+      const promptValue = prompt(keys.prompt, '');
       this.log.debug(`Value: ${promptValue}`);
-      for (let char = 0; char < promptValue.length; char++){
-        textAreaElement.dispatchEvent(new KeyboardEvent('keydown',{'key': promptValue[char]}));  
+      for (let char = 0; char < promptValue.length; char++) {
+        textAreaElement.dispatchEvent(new KeyboardEvent('keydown', {'key': promptValue[char]}));
       }
     }
     return;
   }
-  
-  async keySequenceAction(keySequenceIndex: number) {
-    for (const k in this.keySequences[keySequenceIndex].keys){
-      await this.emulateKeyBoardEvent(this.keySequences[keySequenceIndex].keys[k]);
+
+  async keySequenceAction(keySequenceIndex: number): Promise<void> {
+    for (const k in this.keySequences[keySequenceIndex].keys) {
+      if (this.keySequences[keySequenceIndex].keys.hasOwnProperty(k)) {
+        await this.emulateKeyBoardEvent(this.keySequences[keySequenceIndex].keys[k]);
+      }
     }
-  } 
-  
-  keySequenceReload(): void {
+  }
+
+  keySequencesReload(): void {
     this.loadKeySequencesConfig().subscribe((config: KeySequencesConfig) => {
       if (config) {
         this.keySequences = config.contents['keySequences'];
-        if (this.keySequences){
+        if (this.keySequences) {
           this.keySequencesLoaded = true;
         }
-        for (const k in this.keySequences){
-          this.log.debug(`${k} => ${this.keySequences[k].title}`);
+        for (const k in this.keySequences) {
+          if (this.keySequences.hasOwnProperty(k)) {
+            this.log.debug(`${k} => ${this.keySequences[k].title}`);
+          }
         }
       } else {
         this.keySequencesLoaded = false;
@@ -448,7 +453,7 @@ export class AppComponent implements AfterViewInit {
     if (this.terminal.isConnected()) {
       this.disconnectAndUnsetTitle();
     } else {
-      this.clearAllErrors(); //reset due to user interaction
+      this.clearAllErrors(); // Reset due to user interaction
       this.connectAndSetTitle({
         host: this.host,
         port: this.port,
@@ -463,12 +468,12 @@ export class AppComponent implements AfterViewInit {
     }
   }
 
-  private disconnectAndUnsetTitle() {
+  private disconnectAndUnsetTitle(): void {
     this.terminal.close();
-    if (this.windowActions) {this.windowActions.setTitle(`TN3270 - Disconnected`);}
+    if (this.windowActions) {this.windowActions.setTitle(`TN3270 - Disconnected`); }
   }
 
-  private connectAndSetTitle(connectionSettings:any) {
+  private connectAndSetTitle(connectionSettings: any): void {
     if (this.windowActions) {
       this.windowActions.setTitle(`TN3270 - ${connectionSettings.host}:${connectionSettings.port}`);
     }
@@ -476,10 +481,10 @@ export class AppComponent implements AfterViewInit {
     this.terminal.connectToHost(connectionSettings);
   }
 
-  private nameToCodepage(name) {
-    const stringName = isNaN(Number(name)) ? name : ''+name;
+  private nameToCodepage(name): string {
+    const stringName = isNaN(Number(name)) ? name : '' + name;
     for (let i = 0; i < this.charsets.length; i++) {
-      if ((this.charsets[i].name == stringName) || (this.charsets[i].name.startsWith(stringName+':'))) {
+      if ((this.charsets[i].name === stringName) || (this.charsets[i].name.startsWith(stringName + ':'))) {
         this.selectedCodepage = this.charsets[i].name;
         return this.selectedCodepage;
       }
@@ -487,7 +492,7 @@ export class AppComponent implements AfterViewInit {
     return undefined;
   }
 
-  //identical to isConnected for now, unless there's another reason to disable input
+  // Identical to isConnected for now, unless there's another reason to disable input
   get isInputDisabled(): boolean {
     return this.terminal.isConnected();
   }
@@ -498,11 +503,11 @@ export class AppComponent implements AfterViewInit {
 
   get powerButtonColor(): string {
     if (this.disableButton) {
-      return "#bf3030";
+      return '#bf3030';
     } else if (this.isConnected) {
-      return "#17da38";
+      return '#17da38';
     } else {
-      return "#b9b9b9";
+      return '#b9b9b9';
     }
   }
 
@@ -512,8 +517,8 @@ export class AppComponent implements AfterViewInit {
     } else if (this.column < 0 || !Number.isInteger(this.column)) {
       this.setError(ErrorType.dimension, 'Column number missing or invalid');
     } else if ((this.row * this.column) > 16383) {
-      let rowMax = Math.ceil(16383/this.column);
-      let colMax = Math.ceil(16383/this.row);
+      const rowMax = Math.ceil(16383 / this.column);
+      const colMax = Math.ceil(16383 / this.row);
       this.setError(ErrorType.dimension, `Screen dimension above 16383, decrease row to below ${rowMax} or column to below ${colMax}`);
     } else if (this.errorMessage.length > 0) {
       this.clearError(ErrorType.dimension);
@@ -534,31 +539,35 @@ export class AppComponent implements AfterViewInit {
     } else {
       this.clearError(ErrorType.host);
     }
-  } 
+  }
 
 
   loadConfig(): Observable<ConfigServiceTerminalConfig> {
-    this.log.warn("Config load is wrong and not abstracted");
-    return this.http.get<ConfigServiceTerminalConfig>(ZoweZLUX.uriBroker.pluginConfigForScopeUri(this.pluginDefinition.getBasePlugin(),'user','sessions','_defaultTN3270.json'))
+    this.log.warn('Config load is wrong and not abstracted');
+    return this.http.get<ConfigServiceTerminalConfig>(
+      ZoweZLUX.uriBroker.pluginConfigForScopeUri(this.pluginDefinition.getBasePlugin(), 'user', 'sessions', '_defaultTN3270.json')
+    )
   }
 
   loadZssSettings(): Observable<ZssConfig> {
-    return this.http.get<ZssConfig>(ZoweZLUX.uriBroker.serverRootUri("server/proxies"))
+    return this.http.get<ZssConfig>(ZoweZLUX.uriBroker.serverRootUri('server/proxies'))
   }
 
-  saveSettings() {
-    this.http.put(ZoweZLUX.uriBroker.pluginConfigForScopeUri(this.pluginDefinition.getBasePlugin(), 'user', 'sessions', '_defaultTN3270.json'),
+  saveSettings(): void {
+    this.http.put(
+      ZoweZLUX.uriBroker.pluginConfigForScopeUri(this.pluginDefinition.getBasePlugin(), 'user', 'sessions', '_defaultTN3270.json'
+    ),
       {
         deviceType: Number(this.modType),
-        alternateHeight: this.modType === "5" ? this.row : 24,
-        alternateWidth: this.modType === "5" ? this.column : 80,
+        alternateHeight: this.modType === '5' ? this.row : 24,
+        alternateWidth: this.modType === '5' ? this.column : 80,
         security: {
           type: this.securityType
         },
         port: this.port,
         host: this.host,
         charsetName: this.selectedCodepage
-      }).subscribe((result: any)=> {
+      }).subscribe((result: any) => {
         this.log.debug('Save return');
     });
   }
@@ -570,9 +579,9 @@ export class AppComponent implements AfterViewInit {
   This program and the accompanying materials are
   made available under the terms of the Eclipse Public License v2.0 which accompanies
   this distribution, and is available at https://www.eclipse.org/legal/epl-v20.html
-  
+
   SPDX-License-Identifier: EPL-2.0
-  
+
   Copyright Contributors to the Zowe Project.
 */
 
