@@ -15,7 +15,7 @@ declare var org_zowe_terminal_tn3270: any;
 
 import {Injectable} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
-import {Observable} from 'rxjs';
+import {Observable, throwError} from 'rxjs';
 import {catchError} from 'rxjs/operators';
 
 export class TerminalStateHelper {
@@ -35,7 +35,7 @@ export class TerminalStateHelper {
   handleError(error: any): Observable<void> {
     let errorMsg = error.message || 'Failure to retrieve TN3270/VTAM/TSO data';
 
-    return Observable.throw(errorMsg);
+    return throwError(() => new Error(errorMsg));
   }
 }
 
@@ -75,7 +75,7 @@ export class Terminal {
     let latestContext = {};
     const screenLoadedCallback = () => {
       helper.getAll(this.virtualScreen.getLUName()).subscribe(data=> {
-        if (data.rows && data.rows.length === 1) {
+        if (data?.rows?.length === 1) {
           latestContext = data.rows[0];
           this.log.debug("screenContext from discovery="+JSON.stringify(latestContext, null, 2));
         }
