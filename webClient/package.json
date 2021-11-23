@@ -1,6 +1,6 @@
 {
   "name": "org.zowe.terminal.tn3270",
-  "version": "0.11.2",
+  "version": "1.0.0",
   "description": "A Zowe App for TN3270 Terminal Emulation",
   "author": {
     "name": "Sean Grady",
@@ -12,7 +12,9 @@
     "lint": "tslint -c tslint.json \"./**/*.ts\""
   },
   "license": "EPL-2.0",
-  "dependencies": {},
+  "dependencies": {
+    "tslib": "~2.3.0"
+  },
   "devDependencies": {
     "@angular/animations": "~12.0.0",
     "@angular/common": "~12.0.0",
