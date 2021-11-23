@@ -14,7 +14,7 @@
   <button class="toggle-menu expand-menu" *ngIf="!showMenu" type="submit" (click)="toggleMenu(true)"></button>
   <button class="toggle-menu contract-menu" *ngIf="showMenu" type="submit" (click)="toggleMenu(false)"></button>
   <div *ngIf="showMenu" class="toolbar">
-    <div class="form-group row toolbar-row">
+    <div class="form-group toolbar-row">
       <label class="col-sm-1 col-form-label">Host</label>
       <div class="toolbar-input col-sm-2">
         <input class="form-control" [disabled]="isInputDisabled" required minlength="1" (input)="validateHost()" [(ngModel)]="host">
@@ -44,7 +44,7 @@
         <button type="submit" class="power-toggle-button btn" [style.background-color]="powerButtonColor" [disabled]="disableButton" (click)="toggleConnection()"></button>
       </div>
     </div>
-    <div class="form-group row toolbar-row" style="width: 100%; height:40px">
+    <div class="form-group toolbar-row" style="width: 100%; height:40px">
       <label class="col-sm-1 col-form-label">Column</label>
       <div class="toolbar-input col-sm-2">
         <input type="number" [disabled]="!isDynamic || isInputDisabled" required min="1" max="16383" class="form-control" (input)="validateScreenDimension()" [(ngModel)]="column">
