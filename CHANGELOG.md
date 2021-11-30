@@ -1,5 +1,9 @@
 # Basic TN3270 Display Emulator Changelog
 
+## `1.0.0`
+
+- Breaking change: Upgrade to Angular 12, Typescript 4, and Corejs 3 to match Desktop libraries in Zowe v2
+
 ## `0.11.1`
 
 - Bugfix: Codepage could not be set by the full strings such as "290: Japanese Katakana", but only by "290". Now, both are accepted.

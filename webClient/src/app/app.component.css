@@ -54,6 +54,7 @@
   margin-bottom: 0;
   height: 40px;
   width: 100%;
+  display: flex;
 }
 
 .toolbar {
