@@ -2,7 +2,7 @@ name: Build tn3270-ng2 workflow
 on:
   push:
     branches:
-      - staging, master, rc 
+      - v1.x/staging, master, rc 
   pull_request:
     types: [opened, reopened, synchronize]
 
