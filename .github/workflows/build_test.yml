@@ -1,0 +1,82 @@
+name: Build tn3270-ng2 workflow
+on:
+  push:
+    branches:
+      - v2.x/staging
+  pull_request:
+    types: [opened, reopened, synchronize]
+
+  workflow_dispatch:
+    inputs: 
+      BRANCH_NAME:
+        description: 'Specify branch name or PR (e.g. PR-41)'
+        required: false
+      BUILD_VERSION:
+        description: 'Specify version you would like to build or override'
+        required: false
+      PERFORM_RELEASE:
+        description: '[Release] perform release'
+        required: false
+
+jobs:
+  check-permission:
+    runs-on: ubuntu-latest
+    steps:
+      # this action will fail the whole workflow if permission check fails
+      - name: check permission
+        uses: zowe-actions/shared-actions/permission-check@main
+        with:
+          user: ${{ github.actor }}
+          github-repo: ${{ github.repository }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+  build:
+    runs-on: ubuntu-latest
+    needs: check-permission
+    steps:
+      - name: '[Prep 1] Checkout'
+        uses: actions/checkout@v2
+
+      - name: '[Prep 2] Cache node modules'
+        uses: actions/cache@v2
+        with:
+          # npm cache files are stored in `~/.npm` on Linux/macOS
+          path: |
+            ~/.npm
+            ~/.nvm/.cache
+            ~/.nvm/versions
+          key: ${{ runner.os }}-build-cache-node-modules-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-build-cache-node-modules-
+      - name: '[Prep 3] Setup Node'
+        uses: actions/setup-node@v2
+        with:
+          node-version: 10.24.1
+
+      - name: '[Prep 4] Setup jFrog CLI'
+        uses: jfrog/setup-jfrog-cli@v2
+        env:
+          JF_ARTIFACTORY_1: ${{ secrets.JF_ARTIFACTORY_TOKEN }}
+
+      - name: '[Prep 5] prepare workflow'
+        uses: zowe-actions/zlux-builds/plugins/prepare-workflow@v2.x/main
+        with:
+          github-user: ${{ secrets.ZOWE_ROBOT_USER }}
+          github-password: ${{ secrets.ZOWE_ROBOT_TOKEN }}
+          github-email: ${{ secrets.ZOWE_ROBOT_EMAIL }}
+          github-branch: ${{ github.event.inputs.BRANCH_NAME }}
+
+      - name: '[Prep 6] build'
+        uses: zowe-actions/zlux-builds/plugins/zlux-plugins@v2.x/main
+        with:
+          build-zss: false
+
+      - name: '[Prep 7] packaging'
+        uses: zowe-actions/zlux-builds/plugins/make-pax@v2.x/main
+        with:
+          pax-ssh-username: ${{ secrets.SSH_MARIST_USERNAME }}
+          pax-ssh-password: ${{ secrets.SSH_MARIST_RACF_PASSWORD }}
+          pax-name: tn3270-ng2
+
+      - name: '[Prep 8] deploy '
+        uses: zowe-actions/zlux-builds/plugins/deploy-pax@v2.x/main
