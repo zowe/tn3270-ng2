@@ -76,7 +76,7 @@ export class AppComponent implements AfterViewInit {
   terminal: Terminal;
   host:string;
   port:number;
-  securityType: string;
+  securityType:string;
   modType: string;
   connectionSettings: any;
   errorMessage: string = '';
@@ -151,7 +151,7 @@ export class AppComponent implements AfterViewInit {
   }
 
   ngAfterViewInit(): void {
-    let log: ZLUX.ComponentLogger = this.log;
+    let log:ZLUX.ComponentLogger = this.log;
     log.debug('START: Tn3270 ngAfterViewInit');
     let dispatcher: ZLUX.Dispatcher = ZoweZLUX.dispatcher; 
     const terminalElement = this.terminalElementRef.nativeElement;
@@ -160,18 +160,18 @@ export class AppComponent implements AfterViewInit {
     this.viewportEvents.resized.subscribe(() => this.terminal.performResize());
     if (this.windowActions) {
       this.terminal.contextMenuEmitter.subscribe( (info) => {
-        let screenContext: any = info.screenContext;
+        let screenContext:any = info.screenContext;
         screenContext["sourcePluginID"] = this.pluginDefinition.getBasePlugin().getIdentifier();
-        let recognizers: any[] = dispatcher.getRecognizers(screenContext);
-        let menuItems: ContextMenuItem[] = [];
-        for (let recognizer of recognizers) {
+        let recognizers:any[] = dispatcher.getRecognizers(screenContext);
+        let menuItems:ContextMenuItem[] = [];
+        for (let recognizer of recognizers){
           let action = dispatcher.getAction(recognizer);
           log.debug("Recognizer="+JSON.stringify(recognizer)+" action="+action);
-          if (action) {
+          if (action){
             let menuCallback = () => {
               dispatcher.invokeAction(action, info.screenContext);
             }
-            //menu items can also have children
+            // menu items can also have children
             menuItems.push({text: action.getDefaultName(), action: menuCallback});
           }
         }
@@ -238,7 +238,7 @@ export class AppComponent implements AfterViewInit {
 
   private onWSError(error: TerminalWebsocketError): void {
     let message = "Terminal closed due to websocket error. Code="+error.code;
-    this.log.warn(message + ', Reason=' + error.reason);
+    this.log.warn(message+", Reason="+error.reason);
     this.setError(ErrorType.websocket, message);
     this.disconnectAndUnsetTitle();
   }
@@ -256,7 +256,7 @@ export class AppComponent implements AfterViewInit {
     }
   }
 
-  private clearAllErrors(): void {
+  private clearAllErrors():void {
     this.currentErrors.clear();
     if (this.errorMessage.length > 0) {
       this.refreshErrorBar();
@@ -278,8 +278,8 @@ export class AppComponent implements AfterViewInit {
     if ((error && !hadError) || (!error && hadError)) {
       let offset: number = error ? CONFIG_MENU_ROW_PX : -CONFIG_MENU_ROW_PX;
       this.adjustTerminal(offset);
-    }
-  }
+    }    
+  }  
 
   toggleMenu(state: boolean, menuID: string): void {
     let rows: number;
@@ -315,7 +315,7 @@ export class AppComponent implements AfterViewInit {
 
   /* I expect a JSON here*/
   zluxOnMessage(eventContext: any): Promise<any> {
-    return new Promise((resolve,reject) => {
+    return new Promise((resolve,reject)=> {
       if (!eventContext || !eventContext.data) {
         return reject('Event context missing or malformed');
       }
@@ -481,7 +481,7 @@ export class AppComponent implements AfterViewInit {
   private nameToCodepage(name) {
     const stringName = isNaN(Number(name)) ? name : ''+name;
     for (let i = 0; i < this.charsets.length; i++) {
-      if ((this.charsets[i].name === stringName) || (this.charsets[i].name.startsWith(stringName + ':'))) {
+      if ((this.charsets[i].name == stringName) || (this.charsets[i].name.startsWith(stringName+':'))) {
         this.selectedCodepage = this.charsets[i].name;
         return this.selectedCodepage;
       }
@@ -541,7 +541,7 @@ export class AppComponent implements AfterViewInit {
 
   loadConfig(): Observable<ConfigServiceTerminalConfig> {
     this.log.warn("Config load is wrong and not abstracted");
-    return this.http.get<ConfigServiceTerminalConfig>(ZoweZLUX.uriBroker.pluginConfigForScopeUri(this.pluginDefinition.getBasePlugin(), 'user', 'sessions', '_defaultTN3270.json'))
+    return this.http.get<ConfigServiceTerminalConfig>(ZoweZLUX.uriBroker.pluginConfigForScopeUri(this.pluginDefinition.getBasePlugin(),'user','sessions','_defaultTN3270.json'))
   }
 
   loadZssSettings(): Observable<ZssConfig> {
