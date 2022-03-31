@@ -169,7 +169,7 @@ export class AppComponent implements AfterViewInit {
           log.debug("Recognizer="+JSON.stringify(recognizer)+" action="+action);
           if (action){
             let menuCallback = () => {
-              dispatcher.invokeAction(action, info.screenContext);
+              dispatcher.invokeAction(action,info.screenContext);
             }
             // menu items can also have children
             menuItems.push({text: action.getDefaultName(), action: menuCallback});
