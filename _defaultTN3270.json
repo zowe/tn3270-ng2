@@ -1,7 +1,0 @@
-{
-  "host": "",
-  "port": 23,
-  "security": {
-    "type": "telnet"
-  }
-}
