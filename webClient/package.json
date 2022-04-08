@@ -1,6 +1,6 @@
 {
   "name": "org.zowe.terminal.tn3270",
-  "version": "0.11.2",
+  "version": "0.11.3",
   "description": "A Zowe App for TN3270 Terminal Emulation",
   "author": {
     "name": "Sean Grady",
@@ -9,7 +9,8 @@
   "scripts": {
     "start": "webpack --progress --colors --watch",
     "build": "webpack --progress --colors",
-    "lint": "tslint -c tslint.json \"./**/*.ts\""
+    "lint": "tslint -c tslint.json \"./**/*.ts\"",
+    "lint-npm": "tslint -c tslint.json \"./**/*.ts\" --exclude \"./node_modules/**\""
   },
   "license": "EPL-2.0",
   "dependencies": {},
