@@ -3,6 +3,8 @@ on:
   push:
     branches:
       - v2.x/staging
+      - v2.x/rc
+      - v2.x/master
   pull_request:
     types: [opened, reopened, synchronize]
 
@@ -15,7 +17,8 @@ on:
         description: 'Specify version you would like to build or override'
         required: false
       PERFORM_RELEASE:
-        description: '[Release] perform release'
+        type: boolean
+        description: 'Perform release, Defauls is false'
         required: false
 
 jobs:
