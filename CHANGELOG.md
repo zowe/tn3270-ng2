@@ -4,6 +4,10 @@
 
 - Breaking change: Upgrade to Angular 12, Typescript 4, and Corejs 3 to match Desktop libraries in Zowe v2. This app may no longer work in the Zowe v1 Desktop, and v2 should be used instead.
 
+## `0.11.3`
+
+- New feature for defining own key sequences
+
 ## `0.11.1`
 
 - Bugfix: Codepage could not be set by the full strings such as "290: Japanese Katakana", but only by "290". Now, both are accepted.

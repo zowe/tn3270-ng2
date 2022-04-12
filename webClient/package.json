@@ -9,7 +9,8 @@
   "scripts": {
     "start": "webpack --progress --watch",
     "build": "webpack --progress",
-    "lint": "tslint -c tslint.json \"./**/*.ts\""
+    "lint": "tslint -c tslint.json \"./**/*.ts\"",
+    "lint-npm": "tslint -c tslint.json \"./**/*.ts\" --exclude \"./node_modules/**\""
   },
   "license": "EPL-2.0",
   "dependencies": {
