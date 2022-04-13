@@ -68,6 +68,7 @@ jobs:
           github-password: ${{ secrets.ZOWE_ROBOT_TOKEN }}
           github-email: ${{ secrets.ZOWE_ROBOT_EMAIL }}
           github-branch: ${{ github.event.inputs.BRANCH_NAME }}
+          release: ${{ github.event.inputs.PERFORM_RELEASE }}
 
       - name: '[Prep 6] build'
         uses: zowe-actions/zlux-builds/plugins/zlux-plugins@v2.x/main
