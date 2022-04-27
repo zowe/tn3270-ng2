@@ -13,7 +13,7 @@
 
 
 .toggle-menu {
-  width: 100%;
+  width: 50%;
   height: 14px;
   padding-top: 0;
   padding-bottom: 0;
@@ -55,6 +55,7 @@
   height: 40px;
   width: 100%;
   display: flex;
+  flex-wrap: wrap;
 }
 
 .toolbar {
@@ -103,6 +104,28 @@
   font-weight: 900;
   color: #bf3030;
   margin-left: 15px;
+}
+
+.key-sequence {
+  margin-top: 1px;
+  margin-left: 15px;
+  font-weight: bolder;
+}
+
+.key-sequence-action {
+  color: black;
+}
+
+.key-sequence-menu {
+  color: green;
+}
+
+.key-sequence-warning {
+  color: orangered;
+}
+
+.key-sequence-action:hover {
+  background: darkgray;
 }
 
 /*

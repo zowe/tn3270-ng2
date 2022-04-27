@@ -1,0 +1,207 @@
+{
+	"keySequences": [
+	  {
+		"title": "HW",
+		"description": "Types 'Hello, wordl!' and hits Enter",
+		"keys": [
+		  {
+			"normal": "Hello, wordl!"
+		  },
+		  {
+			"special": "Enter"
+		  }
+		]
+	  },
+	  {
+		"title": "Erase Cursor",
+		"description": "Erases from cursor position to end of field",
+		"keys": [
+		  {
+			"normal": "E",
+			"ctrl": "true"
+		  }
+		]
+	  },
+	  {
+		"title": "Erase Field",
+		"description": "Erases entire field",
+		"keys": [
+		  {
+			"normal": "L",
+			"ctrl": "true"
+		  }
+		]
+	  },
+	  {
+		"title": "Clear",
+		"description": "Erases entire field",
+		"keys": [
+		  {
+			"normal": "Z",
+			"ctrl": "true",
+			"shift": "true"
+		  }
+		]
+	  },
+	  {
+		"title": "Reset",
+		"description": "Erases entire field",
+		"keys": [
+		  {
+			"normal": "R",
+			"ctrl": "true"
+		  }
+		]
+	  },
+	  {
+		"title": "PA1",
+		"description": "PA1 key",
+		"keys": [
+		  {
+			"normal": "1",
+			"alt": "true"
+		  }
+		]
+	  },
+	  {
+		"title": "PA2",
+		"description": "PA2 key",
+		"keys": [
+		  {
+			"normal": "2",
+			"alt": "true"
+		  }
+		]
+	  },
+	  {
+		"title": "PA3",
+		"description": "PA3 key",
+		"keys": [
+		  {
+			"normal": "3",
+			"alt": "true"
+		  }
+		]
+	  },
+	  {
+		"title": "PF13",
+		"description": "Terminal: PF13",
+		"keys": [
+		  {
+			"special": "F1",
+			"shift": "true"
+		  }
+		]
+	  },
+	  {
+		"title": "PF14",
+		"description": "Terminal: PF14",
+		"keys": [
+		  {
+			"special": "F2",
+			"shift": "true"
+		  }
+		]
+	  },
+	  {
+		"title": "PF15",
+		"description": "Terminal: PF15",
+		"keys": [
+		  {
+			"special": "F3",
+			"shift": "true"
+		  }
+		]
+	  },
+	  {
+		"title": "PF16",
+		"description": "Terminal: PF16",
+		"keys": [
+		  {
+			"special": "F4",
+			"shift": "true"
+		  }
+		]
+	  },
+	  {
+		"title": "PF17",
+		"description": "Terminal: PF17",
+		"keys": [
+		  {
+			"special": "F5",
+			"shift": "true"
+		  }
+		]
+	  },
+	  {
+		"title": "PF18",
+		"description": "Terminal: PF18",
+		"keys": [
+		  {
+			"special": "F6",
+			"shift": "true"
+		  }
+		]
+	  },
+	  {
+		"title": "PF19",
+		"description": "Terminal: PF19",
+		"keys": [
+		  {
+			"special": "F7",
+			"shift": "true"
+		  }
+		]
+	  },
+	  {
+		"title": "PF20",
+		"description": "Terminal: PF20",
+		"keys": [
+		  {
+			"special": "F8",
+			"shift": "true"
+		  }
+		]
+	  },
+	  {
+		"title": "PF21",
+		"description": "Terminal: PF21",
+		"keys": [
+		  {
+			"special": "F9",
+			"shift": "true"
+		  }
+		]
+	  },
+	  {
+		"title": "PF22",
+		"description": "Terminal: PF22",
+		"keys": [
+		  {
+			"special": "F10",
+			"shift": "true"
+		  }
+		]
+	  },
+	  {
+		"title": "PF23",
+		"description": "Terminal: PF23",
+		"keys": [
+		  {
+			"special": "F11",
+			"shift": "true"
+		  }
+		]
+	  },
+	  {
+		"title": "PF24",
+		"description": "Terminal: PF24",
+		"keys": [
+		  {
+			"special": "F12",
+			"shift": "true"
+		  }
+		]
+	  }
+	]
+  }
