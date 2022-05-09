@@ -10,7 +10,8 @@
     "start": "webpack --progress --colors --watch",
     "build": "webpack --progress --colors",
     "lint": "tslint -c tslint.json \"./**/*.ts\"",
-    "lint-npm": "tslint -c tslint.json \"./**/*.ts\" --exclude \"./node_modules/**\""
+    "lint-npm": "tslint -c tslint.json \"./**/*.ts\" --exclude \"./node_modules/**\"",
+    "test": "exit 0"
   },
   "license": "EPL-2.0",
   "dependencies": {},
