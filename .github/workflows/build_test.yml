@@ -54,7 +54,7 @@ jobs:
       - name: '[Prep 3] Setup Node'
         uses: actions/setup-node@v2
         with:
-          node-version: 10.24.1
+          node-version: 14
 
       - name: '[Prep 4] Setup jFrog CLI'
         uses: jfrog/setup-jfrog-cli@v2
