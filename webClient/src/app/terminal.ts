@@ -24,7 +24,7 @@ export class TerminalStateHelper {
   constructor(public http: HttpClient, 
               public log: ZLUX.ComponentLogger,
              pluginDefinition: any){
-    this.url = ZoweZLUX.uriBroker.pluginRESTUri(pluginDefinition.getBasePlugin(), 'stateDiscovery', '/zosDiscovery/system/tn3270');
+    this.url = ZoweZLUX.uriBroker.pluginRESTUri(pluginDefinition.getBasePlugin(), 'stateDiscovery', 'zosDiscovery/system/tn3270');
   }
 
   getAll(luname?:string): Observable<any> {
