@@ -109,7 +109,7 @@ export class Terminal {
                                    connectionSettings,
                                    null,{contextCallback:contextCallback,
                                          screenLoadedCallback: screenLoadedCallback,
-                                         wsErrorCallback: wsErrorCallback}, null);
+                                         wsErrorCallback: wsErrorCallback});
   }
 
   isConnected(): boolean {

@@ -481,8 +481,6 @@ export class AppComponent implements AfterViewInit {
   }
 
   private nameToCodepage(name) {
-    //asdf 
-    console.dir(this.charsets); //Debug
     const stringName = isNaN(Number(name)) ? name : ''+name;
     for (let i = 0; i < this.charsets.length; i++) {
       if ((this.charsets[i].name == stringName) || (this.charsets[i].name.startsWith(stringName+':'))) {
