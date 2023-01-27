@@ -63,4 +63,5 @@ jobs:
 
       - name: '[Prep 5] test workflow'
         uses: zowe-actions/zlux-builds/plugins/bump-version@users/jstruga/npm-bump-version
-        
+        env: 
+         GITHUB_TOKEN: ${{ secrets.ZOWE_ROBOT_TOKEN }}
