@@ -60,6 +60,14 @@ jobs:
         uses: jfrog/setup-jfrog-cli@v2
         env:
           JF_ARTIFACTORY_1: ${{ secrets.JF_ARTIFACTORY_TOKEN }}
+          
+      - name: '[Prep 5] prepare workflow'
+        uses: zowe-actions/zlux-builds/plugins/prepare-workflow@v2.x/main
+        with:
+          github-user: ${{ secrets.ZOWE_ROBOT_USER }}
+          github-password: ${{ secrets.ZOWE_ROBOT_TOKEN }}
+          github-email: ${{ secrets.ZOWE_ROBOT_EMAIL }}
+          github-branch: ${{ github.event.inputs.BRANCH_NAME }}
 
       - name: '[Prep 5] test workflow'
         uses: zowe-actions/zlux-builds/plugins/bump-version@users/jstruga/npm-bump-version
