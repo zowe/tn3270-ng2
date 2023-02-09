@@ -60,7 +60,7 @@ jobs:
         uses: jfrog/setup-jfrog-cli@v2
         env:
           JF_ARTIFACTORY_1: ${{ secrets.JF_ARTIFACTORY_TOKEN }}
-          
+
       - name: '[Prep 5] prepare workflow'
         uses: zowe-actions/zlux-builds/plugins/prepare-workflow@v2.x/main
         with:
@@ -69,7 +69,23 @@ jobs:
           github-email: ${{ secrets.ZOWE_ROBOT_EMAIL }}
           github-branch: ${{ github.event.inputs.BRANCH_NAME }}
 
-      - name: '[Prep 5] test workflow'
-        uses: zowe-actions/zlux-builds/plugins/bump-version@users/jstruga/npm-bump-version
+      - name: '[Prep 6] build'
+        uses: zowe-actions/zlux-builds/plugins/zlux-plugins@v2.x/main
+        with:
+          build-zss: false
+
+      - name: '[Prep 7] packaging'
+        uses: zowe-actions/zlux-builds/plugins/make-pax@v2.x/main
+        with:
+          pax-ssh-username: ${{ secrets.SSH_MARIST_USERNAME }}
+          pax-ssh-password: ${{ secrets.SSH_MARIST_RACF_PASSWORD }}
+          pax-name: tn3270-ng2
+
+      - name: '[Prep 8] deploy '
+        uses: zowe-actions/zlux-builds/plugins/deploy-pax@v2.x/main
+        
+      - name: '[Prep 9] Bump Staging Version '
+        if: ${{ github.event.inputs.PERFORM_RELEASE == 'true' && env.RELEASE == 'true' }}
+        uses: zowe-actions/zlux-builds/plugins/bump-version@v2.x/main
         env: 
          GITHUB_TOKEN: ${{ secrets.ZOWE_ROBOT_TOKEN }}
