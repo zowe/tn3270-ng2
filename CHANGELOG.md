@@ -1,5 +1,8 @@
 # Basic TN3270 Display Emulator Changelog
 
+## `1.0.1`
+- Switched to use terminal functionality of Open Mainframe Project [TSTerm](https://github.com/TSTerminal)
+
 ## `1.0.0`
 
 - Breaking change: Upgrade to Angular 12, Typescript 4, and Corejs 3 to match Desktop libraries in Zowe v2. This app may no longer work in the Zowe v1 Desktop, and v2 should be used instead.
