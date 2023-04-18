@@ -8,11 +8,11 @@
   Copyright Contributors to the Zowe Project.
 */
 
-import 'script-loader!./../lib/js/tn3270.js';
+import 'script-loader!tsterm/lib/iife/tsterm.js';
 import { AfterViewInit, OnDestroy, Component, ElementRef, Input, ViewChild, Inject, Optional } from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {Observable} from 'rxjs';
-declare var org_zowe_terminal_tn3270: any;
+declare var org_omp_tsterm_tn3270: any;
 
 import { Angular2InjectionTokens, Angular2PluginWindowActions, Angular2PluginViewportEvents, ContextMenuItem } from 'pluginlib/inject-resources';
 
@@ -85,7 +85,7 @@ export class AppComponent implements AfterViewInit {
   isDynamic: boolean;
   row: number;
   column: number;
-  charsets: Array<any> = org_zowe_terminal_tn3270.TERMINAL_DEFAULT_CHARSETS;
+  charsets: Array<any> = org_omp_tsterm_tn3270.CharsetInfo.TERMINAL_DEFAULT_CHARSETS;
   selectedCodepage: string = "1047: International";
   terminalDivStyle: any;
   showConnectionMenu: boolean;

@@ -9,9 +9,10 @@
   
   Copyright Contributors to the Zowe Project.
 */
+
 import { Subject } from 'rxjs';
 
-declare var org_zowe_terminal_tn3270: any;
+declare var org_omp_tsterm_tn3270: any;
 
 import {Injectable} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
@@ -103,7 +104,7 @@ export class Terminal {
       this.wsErrorEmitter.next({code: wsCode, reason: wsReason, terminalMessage: terminalMessage});
     };
 
-    this.virtualScreen = org_zowe_terminal_tn3270.start3270({parentDiv:this.terminalElement,
+    this.virtualScreen = org_omp_tsterm_tn3270.TerminalLauncher.start3270({parentDiv:this.terminalElement,
                                     width: width, height: height},
                                    connectionSettings,
                                    null,{contextCallback:contextCallback,
