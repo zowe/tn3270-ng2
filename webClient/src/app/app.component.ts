@@ -8,7 +8,7 @@
   Copyright Contributors to the Zowe Project.
 */
 
-import 'script-loader!tsterm/lib/iife/tsterm.js';
+import 'script-loader!tstermz/lib/iife/tsterm.js';
 import { AfterViewInit, OnDestroy, Component, ElementRef, Input, ViewChild, Inject, Optional } from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {Observable} from 'rxjs';
