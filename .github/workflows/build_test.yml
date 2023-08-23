@@ -70,7 +70,7 @@ jobs:
             echo "::set-output name=changelog::$CHANGELOG_TEXT"
             echo "::set-output name=version::$VERSION"
           else
-            echo -e "No changelog and version information found in PR description please add them.\n Expected Format:\n VERSION:vX.XX.X\n CHANGELOG:This is changelog note.\n
+            echo -e "No changelog and version information found in PR description please add them.\n Expected Format:\n VERSION:X.XX.X\n CHANGELOG:This is changelog note.\n
             To re-run the action, just make a push or commit after updating the PR description or updating the changelog via a manual file changing commit."
             exit 1
           fi
