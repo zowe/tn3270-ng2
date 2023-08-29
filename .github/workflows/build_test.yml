@@ -33,6 +33,50 @@ jobs:
           github-repo: ${{ github.repository }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
+  check_changelog:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+            path: copy-repo
+            fetch-depth: ${{ github.event_name == 'pull_request' && 2 || 0 }}
+
+      - name: Get changed files
+        id: changed-files
+        run: |
+            cd copy-repo
+            if ${{ github.event_name == 'pull_request' }}; then
+                echo "changed_files=$(git diff --name-only -r HEAD^1 HEAD | xargs)" >> $GITHUB_OUTPUT
+            else
+                echo "changed_files=$(git diff --name-only ${{ github.event.before }} ${{ github.event.after }} | xargs)" >> $GITHUB_OUTPUT
+            fi
+
+      - name: List changed files
+        id: set-flag
+        run: |
+            cd copy-repo
+            for file in ${{ steps.changed-files.outputs.changed_files }}; do
+                echo "$file was changed"
+                if [[ $file == "CHANGELOG.md" ]]
+                then
+                  echo "file-flag=true" >> $GITHUB_OUTPUT
+                  break;
+                else
+                  echo "file-flag=false" >> $GITHUB_OUTPUT
+                fi
+            done
+
+      - name: Check if CHANGELOG is Updated and Abort if not updated
+        if: steps.set-flag.outputs.file-flag != 'true'
+        run: |
+          echo "CHANGELOG.md not updated, please update CHANGELOG.md with the changes made in the pull request"
+          exit 1
+
+      - name: Remove copy-repo
+        if: always()
+        run: rm -r copy-repo
+
   build:
     runs-on: ubuntu-latest
     needs: check-permission
