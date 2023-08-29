@@ -92,10 +92,10 @@ jobs:
               sed -i "$ANCHOR_LINE a\\
               \n##  \`$VERSION\`\n- $ESCAPED_CHANGELOG (#${{ github.event.pull_request.number }})\n" CHANGELOG.md
             fi
-            git config --local user.email "action@github.com"
-            git config --local user.name "GitHub Action"
+            git config --global user.email "zowe-robot@users.noreply.github.com"
+            git config --global user.name "Zowe Robot"
             git add CHANGELOG.md
-            git commit -m "Update changelog with PR #${{ github.event.pull_request.number }} description"
+            git commit -s -m "Update changelog with PR #${{ github.event.pull_request.number }} description"
             git push
           fi
       - name: check for changes
