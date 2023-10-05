@@ -30,7 +30,7 @@
     "compression-webpack-plugin": "~6.1.1",
     "copy-webpack-plugin": "~5.1.2",
     "core-js": "~3.19.0",
-    "css-loader": "~3.6.0",
+    "css-loader": "~6.8.1",
     "exports-loader": "~0.7.0",
     "file-loader": "~4.3.0",
     "html-loader": "~0.5.5",
