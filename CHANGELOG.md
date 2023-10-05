@@ -1,4 +1,4 @@
-# Basic TN3270 Display Emulator Changelog 
+# Basic TN3270 Display Emulator Changelog
 
 ## `1.0.0`
  
