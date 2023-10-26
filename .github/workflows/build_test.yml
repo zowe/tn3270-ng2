@@ -33,49 +33,98 @@ jobs:
           github-repo: ${{ github.repository }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
+  update-changelog:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    outputs:
+      was_updated: ${{ steps.check-change.outputs.change_detected }}
+      check_commit: ${{ steps.check-changelog.outputs.check_commit }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+
+      - name: Check for updated CHANGELOG.md using git
+        id: check-changelog
+        run: |
+          if git diff --name-only origin/${{ github.base_ref }} | grep -q "^CHANGELOG.md$"; then
+            echo "CHANGELOG.md has been updated."
+            echo "::set-output name=check_commit::true"
+          else
+            echo "ERROR: CHANGELOG.md has not been updated."
+            echo "::set-output name=check_commit::false"
+          fi
+      - name: Extract changelog info
+        if: steps.check-changelog.outputs.check_commit == 'false'
+        id: extract-changelog
+        run: |
+          PR_DESCRIPTION="${{ github.event.pull_request.body }}"
+          # Check if "changelog:" exists in PR description
+          if echo "$PR_DESCRIPTION" | grep -q "VERSION:" && echo "$PR_DESCRIPTION" | grep -q "CHANGELOG:"; then
+            # Extract text after "changelog:"
+            CHANGELOG_TEXT=$(echo $PR_DESCRIPTION | sed -n 's/.*CHANGELOG: \(.*\)/\1/p')
+            # Extract VERSION: from PR description
+            VERSION=$(echo "$PR_DESCRIPTION" | grep -oP 'VERSION:\s*\K\d+\.\d+\.\d+')        
+            echo "Extracted changelog: $CHANGELOG_TEXT"
+            echo "::set-output name=changelog::$CHANGELOG_TEXT"
+            echo "::set-output name=version::$VERSION"
+          else
+            echo -e "No changelog and version information found in PR description please add them.\n Expected Format:\n VERSION:X.XX.X\n CHANGELOG:This is changelog note.\n
+            To re-run the action, just make a push or commit after updating the PR description or updating the changelog via a manual file changing commit."
+            exit 1
+          fi
+      - name: Check PR body against changelog
+        if: steps.check-changelog.outputs.check_commit == 'false'
+        run: |
+          ESCAPED_CHANGELOG="${{ steps.extract-changelog.outputs.changelog }}"
+          ESCAPED_CHANGELOG=$(echo "$ESCAPED_CHANGELOG" | sed "s/'/\\\\'/g")
+          VERSION="${{ steps.extract-changelog.outputs.version }}"
+          
+          if ! grep -Fq "$ESCAPED_CHANGELOG" CHANGELOG.md; then
+            # Check if version exists in CHANGELOG.md
+            if grep -q "^## \`$VERSION\`" CHANGELOG.md; then
+              # Append PR description to existing version
+              sed -i "/^## \`$VERSION\`/a - $ESCAPED_CHANGELOG (#${{ github.event.pull_request.number }})" CHANGELOG.md
+            else
+              # Append new version and PR description
+              ANCHOR_LINE=$(awk '/# Basic TN3270 Display Emulator Changelog/ {print NR}' CHANGELOG.md)
+              sed -i "$ANCHOR_LINE a\\
+              \n##  \`$VERSION\`\n- $ESCAPED_CHANGELOG (#${{ github.event.pull_request.number }})\n" CHANGELOG.md
+            fi
+            git config --global user.email "zowe-robot@users.noreply.github.com"
+            git config --global user.name "Zowe Robot"
+            git add CHANGELOG.md
+            git commit -s -m "Update changelog with PR #${{ github.event.pull_request.number }} description"
+            git push
+          fi
+      - name: check for changes
+        id: check-change
+        run: |
+          if git diff --name-only HEAD^ HEAD | grep 'changelog.md'; then
+            echo "No Changes detected, setting flag to false"
+            echo "::set-output name=change_detected::false"
+          else
+            echo "::set-output name=change_detected::true"
+          fi
+
   check_changelog:
+    if: github.event_name == 'pull_request'
+    needs: update-changelog
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
-        with:
-            path: copy-repo
-            fetch-depth: ${{ github.event_name == 'pull_request' && 2 || 0 }}
+        uses: actions/checkout@v2
 
-      - name: Get changed files
-        id: changed-files
+      - name: Verify Changelog update
         run: |
-            cd copy-repo
-            if ${{ github.event_name == 'pull_request' }}; then
-                echo "changed_files=$(git diff --name-only -r HEAD^1 HEAD | xargs)" >> $GITHUB_OUTPUT
-            else
-                echo "changed_files=$(git diff --name-only ${{ github.event.before }} ${{ github.event.after }} | xargs)" >> $GITHUB_OUTPUT
-            fi
-
-      - name: List changed files
-        id: set-flag
-        run: |
-            cd copy-repo
-            for file in ${{ steps.changed-files.outputs.changed_files }}; do
-                echo "$file was changed"
-                if [[ $file == "CHANGELOG.md" ]]
-                then
-                  echo "file-flag=true" >> $GITHUB_OUTPUT
-                  break;
-                else
-                  echo "file-flag=false" >> $GITHUB_OUTPUT
-                fi
-            done
-
-      - name: Check if CHANGELOG is Updated and Abort if not updated
-        if: steps.set-flag.outputs.file-flag != 'true'
-        run: |
-          echo "CHANGELOG.md not updated, please update CHANGELOG.md with the changes made in the pull request"
-          exit 1
-
-      - name: Remove copy-repo
-        if: always()
-        run: rm -r copy-repo
+          if [ "${{ needs.update-changelog.outputs.was_updated }}" != "true" ]; then
+            echo "CHANGELOG.md not updated, please update CHANGELOG.md with the changes made in the pull request"
+            exit 1
+          else
+            echo "changelog was updated successfully."
+          fi    
 
   build:
     runs-on: ubuntu-latest
