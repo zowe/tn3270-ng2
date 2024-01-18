@@ -1,6 +1,6 @@
 {
   "name": "org.zowe.terminal.tn3270",
-  "version": "2.7.0",
+  "version": "3.0.0",
   "description": "A Zowe App for TN3270 Terminal Emulation",
   "author": {
     "name": "Sean Grady",

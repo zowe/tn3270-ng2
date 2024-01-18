@@ -2,9 +2,9 @@ name: Build tn3270-ng2 workflow
 on:
   push:
     branches:
-      - v2.x/staging
-      - v2.x/rc
-      - v2.x/master
+      - v3.x/staging
+      - v3.x/rc
+      - v3.x/master
   pull_request:
     types: [opened, reopened, synchronize]
 
@@ -147,7 +147,7 @@ jobs:
           JF_ARTIFACTORY_1: ${{ secrets.JF_ARTIFACTORY_TOKEN }}
 
       - name: '[Prep 5] prepare workflow'
-        uses: zowe-actions/zlux-builds/plugins/prepare-workflow@v2.x/main
+        uses: zowe-actions/zlux-builds/plugins/prepare-workflow@v3.x/main
         with:
           github-user: ${{ secrets.ZOWE_ROBOT_USER }}
           github-password: ${{ secrets.ZOWE_ROBOT_TOKEN }}
@@ -157,22 +157,22 @@ jobs:
           plugin-version: ${{ github.event.inputs.BUILD_VERSION }}
 
       - name: '[Prep 6] build'
-        uses: zowe-actions/zlux-builds/plugins/zlux-plugins@v2.x/main
+        uses: zowe-actions/zlux-builds/plugins/zlux-plugins@v3.x/main
         with:
           build-zss: false
 
       - name: '[Prep 7] packaging'
-        uses: zowe-actions/zlux-builds/plugins/make-pax@v2.x/main
+        uses: zowe-actions/zlux-builds/plugins/make-pax@v3.x/main
         with:
           pax-ssh-username: ${{ secrets.SSH_MARIST_USERNAME }}
           pax-ssh-password: ${{ secrets.SSH_MARIST_RACF_PASSWORD }}
           pax-name: tn3270-ng2
 
       - name: '[Prep 8] deploy '
-        uses: zowe-actions/zlux-builds/plugins/deploy-pax@v2.x/main
+        uses: zowe-actions/zlux-builds/plugins/deploy-pax@v3.x/main
         
       - name: '[Prep 9] Bump Staging Version '
         if: ${{ github.event.inputs.PERFORM_RELEASE == 'true' && env.RELEASE == 'true' }}
-        uses: zowe-actions/zlux-builds/plugins/bump-version@v2.x/main
+        uses: zowe-actions/zlux-builds/plugins/bump-version@v3.x/main
         env: 
          GITHUB_TOKEN: ${{ secrets.ZOWE_ROBOT_TOKEN }}
