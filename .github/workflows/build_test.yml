@@ -33,6 +33,91 @@ jobs:
           github-repo: ${{ github.repository }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
+  update-changelog:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    outputs:
+      was_updated: ${{ steps.check-change.outputs.change_detected }}
+      check_commit: ${{ steps.check-changelog.outputs.check_commit }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+
+      - name: Check for updated CHANGELOG.md using git
+        id: check-changelog
+        run: |
+          if git diff --name-only origin/${{ github.base_ref }} | grep -q "^CHANGELOG.md$"; then
+            echo "CHANGELOG.md has been updated."
+            echo "::set-output name=check_commit::true"
+          else
+            echo "ERROR: CHANGELOG.md has not been updated."
+            echo "::set-output name=check_commit::false"
+          fi
+      - name: Compare PR description with template
+        if: steps.check-changelog.outputs.check_commit == 'false'
+        env:
+          PR_DESCRIPTION: ${{ github.event.pull_request.body }}
+        run: |
+          # Safely print the PR description using Node.js
+          
+          node -e "const fs=require('fs'); fs.writeFileSync('/tmp/pr_description.txt', process.env.PR_DESCRIPTION);"
+          # Use diff to compare the two files
+          if diff -wB /tmp/pr_description.txt .github/pull_request_template.md > /dev/null; then
+            echo "ERROR: PR description is identical to the template."
+            exit 1
+          else
+            echo "PR description and template are different."
+          fi
+
+      - name: Check PR body against changelog
+        if: steps.check-changelog.outputs.check_commit == 'false'
+        id: extract-changelog
+        run: |
+          result=$(node .github/workflows/set-changelog.js ${{ github.event.pull_request.number }})
+          if [ "$result" = "Success" ]; then
+            git config --global user.email "zowe-robot@users.noreply.github.com"
+            git config --global user.name "Zowe Robot"
+            git add CHANGELOG.md
+            git commit -s -m "Update changelog with PR #${{ github.event.pull_request.number }} description"
+            git push
+            echo "Updated CHANGELOG from description"
+          else
+            echo $result
+            echo -e "No changelog and version information found in PR description. Please add them.\nExpected Format:\nVERSION:X.XX.X\nCHANGELOG:This is changelog note.\nTo re-run the action, just make a push or commit after updating the PR description or updating the changelog via a manual file changing commit."
+            exit 1
+          fi
+
+      - name: check for changes
+        id: check-change
+        run: |
+          if git diff --name-only HEAD^ HEAD | grep 'changelog.md'; then
+            echo "No Changes detected, setting flag to false"
+            echo "::set-output name=change_detected::false"
+          else
+            echo "::set-output name=change_detected::true"
+            fi
+
+  check_changelog:
+    if: github.event_name == 'pull_request'
+    needs: update-changelog
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Verify Changelog update
+        run: |
+          if [ "${{ needs.update-changelog.outputs.was_updated }}" != "true" ]; then
+            echo "CHANGELOG.md not updated, please update CHANGELOG.md with the changes made in the pull request"
+            exit 1
+          else
+            echo "changelog was updated successfully."
+          fi
+
+
   build:
     runs-on: ubuntu-latest
     needs: check-permission
