@@ -11,7 +11,7 @@ This an application that presents a basic IBM 3270 terminal emulator within the 
 **To request features or report bugs, please use the issues page at the [zlux repo](https://github.com/zowe/zlux/issues) with the terminal, app, or tn3270-ng2 tags**
 
 ## Usage
-See the zowe documentation: https://github.com/Martin-Zeithaml/docs-site/blob/3270/docs/user-guide/mvd-3270.md
+See the zowe documentation: https://docs.zowe.org/stable/user-guide/mvd-3270/
 
 ## Building
 See the zowe documentation: https://docs.zowe.org/stable/extend/extend-desktop/mvd-buildingplugins/
