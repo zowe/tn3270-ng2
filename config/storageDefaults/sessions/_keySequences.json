@@ -34,7 +34,7 @@
 	  },
 	  {
 		"title": "Clear",
-		"description": "Erases entire field",
+		"description": "Clear screen",
 		"keys": [
 		  {
 			"normal": "Z",
@@ -45,7 +45,7 @@
 	  },
 	  {
 		"title": "Reset",
-		"description": "Erases entire field",
+		"description": "Reset",
 		"keys": [
 		  {
 			"normal": "R",
