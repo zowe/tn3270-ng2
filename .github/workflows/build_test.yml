@@ -157,9 +157,10 @@ jobs:
           plugin-version: ${{ github.event.inputs.BUILD_VERSION }}
 
       - name: '[Prep 6] build'
-        uses: zowe-actions/zlux-builds/plugins/zlux-plugins@struga0258-patch-1
+        uses: zowe-actions/zlux-builds/plugins/zlux-plugins@v3.x/main
         with:
           build-zss: false
+          clone-v2: true
 
       - name: '[Prep 7] packaging'
         uses: zowe-actions/zlux-builds/plugins/make-pax@v3.x/main
