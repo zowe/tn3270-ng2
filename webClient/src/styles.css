@@ -10,10 +10,10 @@
 
 /* You can add global styles to this file, and also import other style files */
 
-/* .col-sm-1 {
-  padding-left: 15px !important;
-  padding-right: 15px !important;
-} */
+[class^="col-"] {
+  padding-left: 15px;
+  padding-right: 15px;
+}
 
 /*
   This program and the accompanying materials are
