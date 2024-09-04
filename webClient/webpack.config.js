@@ -11,32 +11,48 @@
 */
 
 var path = require('path');
-var CopyWebpackPlugin = require('copy-webpack-plugin');
 const CompressionPlugin = require('compression-webpack-plugin');
-const baseConfig = require(path.resolve(process.env.MVD_DESKTOP_DIR, 'plugin-config/webpack.base.js'));
+const baseConfig = require(path.resolve(process.env.MVD_DESKTOP_DIR, 'plugin-config/webpack5.base.js'));
+const AotPlugin = require('@ngtools/webpack').AngularWebpackPlugin;
 
 if (process.env.MVD_DESKTOP_DIR == null) {
   throw new Error('You must specify MVD_DESKTOP_DIR in your environment');
 }
 
 var config = {
-  'entry': [
+  entry: [
     path.resolve(__dirname, './src/plugin.ts')
   ],
-  'output': {
-    'path': path.resolve(__dirname, '../web'),
-    'filename': 'main.js',
+  output: {
+    path: path.resolve(__dirname, '../web'),
+    filename: 'main.js',
+    clean: true
   },
-  'plugins': [
-    new CopyWebpackPlugin([
+  resolve: {
+    alias: {
+      '~': path.resolve(__dirname, './node_modules/'),
+    }
+  },
+  module: {
+    rules: [
       {
-        from: path.resolve(__dirname, './src/assets'),
-        to: path.resolve('../web/assets')
+        test: /(?:\.ngfactory\.js|\.ngstyle\.js|\.ts)$/,
+        use: ['@ngtools/webpack']
+      },
+      {
+        test: /\.css$/i,
+        use: ["style-loader", "css-loader"],
       }
-    ]),
+    ]
+  },
+  plugins: [
     new CompressionPlugin({
       threshold: 100000,
       minRatio: 0.8
+    }),
+    new AotPlugin({
+      tsConfigPath: './tsconfig.json',
+      entryModule: './webClient/src/app/app.module.ts#AppModule'
     })
   ]
 };
@@ -48,7 +64,7 @@ function deepMerge(base, extension) {
         if (!base[key]) base[key] = {};
         deepMerge(base[key], extension[key]);
       } else {
-        Object.assign(base, {[key]: extension[key]});
+        Object.assign(base, { [key]: extension[key] });
       }
     }
   }

@@ -10,19 +10,21 @@
 
 import 'script-loader!./../lib/js/tn3270.js';
 import { AfterViewInit, OnDestroy, Component, ElementRef, Input, ViewChild, Inject, Optional } from '@angular/core';
-import {HttpClient} from '@angular/common/http';
-import {Observable} from 'rxjs';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
 declare var org_zowe_terminal_tn3270: any;
 
 import { Angular2InjectionTokens, Angular2PluginWindowActions, Angular2PluginViewportEvents, ContextMenuItem } from 'pluginlib/inject-resources';
 
-import { Terminal, TerminalWebsocketError} from './terminal';
+import { Terminal, TerminalWebsocketError } from './terminal';
 import { ConfigServiceTerminalConfig, ZssConfig, KeySequencesConfig, KeySequence, Keys } from './terminal.config';
+
+import  "./app.component.css";
 
 const TOGGLE_MENU_BUTTON_PX = 16; //with padding
 const CONFIG_MENU_ROW_PX = 40;
 const CONFIG_MENU_PAD_PX = 4;
-const CONFIG_MENU_SIZE_PX = (CONFIG_MENU_ROW_PX*2)+CONFIG_MENU_PAD_PX; //40 per row, plus 2 px padding
+const CONFIG_MENU_SIZE_PX = (CONFIG_MENU_ROW_PX * 2) + CONFIG_MENU_PAD_PX; //40 per row, plus 2 px padding
 
 enum ErrorType {
   host,
@@ -33,13 +35,13 @@ enum ErrorType {
 }
 
 class ErrorState {
-  private stateArray: Array<string|null> = new Array<string|null>();
+  private stateArray: Array<string | null> = new Array<string | null>();
 
-  set(type: ErrorType, message: string|null) {
+  set(type: ErrorType, message: string | null) {
     this.stateArray[type] = message;
   }
 
-  get(type:ErrorType): string|null {
+  get(type: ErrorType): string | null {
     return this.stateArray[type];
   }
 
@@ -49,13 +51,13 @@ class ErrorState {
 
   //should it block connection
   isStateBlocking(): boolean {
-    if (this.stateArray[ErrorType.host] || this.stateArray[ErrorType.port] || this.stateArray[ErrorType.dimension] ){
+    if (this.stateArray[ErrorType.host] || this.stateArray[ErrorType.port] || this.stateArray[ErrorType.dimension]) {
       return true;
     }
     return false;
   }
 
-  getFirstError(): string|null {
+  getFirstError(): string | null {
     for (let i = 0; i < this.stateArray.length; i++) {
       if (this.stateArray[i]) {
         return this.stateArray[i];
@@ -67,8 +69,7 @@ class ErrorState {
 
 @Component({
   selector: 'com-rs-mvd-tn3270',
-  templateUrl: './app.component.html',
-  styleUrls: ['./app.component.css']
+  templateUrl: './app.component.html'
 })
 export class AppComponent implements AfterViewInit {
   @ViewChild('terminal')
@@ -76,9 +77,9 @@ export class AppComponent implements AfterViewInit {
   @ViewChild('terminalParent')
   terminalParentElementRef: ElementRef;
   terminal: Terminal;
-  host:string;
-  port:number;
-  securityType:string;
+  host: string;
+  port: number;
+  securityType: string;
   modType: string;
   connectionSettings: any;
   errorMessage: string = '';
@@ -104,28 +105,28 @@ export class AppComponent implements AfterViewInit {
     @Optional() @Inject(Angular2InjectionTokens.WINDOW_ACTIONS) private windowActions: Angular2PluginWindowActions,
     @Inject(Angular2InjectionTokens.LAUNCH_METADATA) private launchMetadata: any,
   ) {
-    this.log.info('Recvd launch metadata='+JSON.stringify(launchMetadata));
+    this.log.info('Recvd launch metadata=' + JSON.stringify(launchMetadata));
     if (launchMetadata != null && launchMetadata.data) {
       switch (launchMetadata.data.type) {
-      case "connect":
-        if (launchMetadata.data.connectionSettings) {
-          let cs = launchMetadata.data.connectionSettings;
-          this.host = cs.host;
-          this.port = cs.port;
-          this.modType = ""+cs.deviceType;
-          if (cs.security && cs.security.type){
-            this.securityType = ""+cs.security.type;
+        case "connect":
+          if (launchMetadata.data.connectionSettings) {
+            let cs = launchMetadata.data.connectionSettings;
+            this.host = cs.host;
+            this.port = cs.port;
+            this.modType = "" + cs.deviceType;
+            if (cs.security && cs.security.type) {
+              this.securityType = "" + cs.security.type;
+            }
+            if (this.modType === "5") {
+              this.isDynamic = true;
+              this.row = cs.alternateHeight ? cs.alternateHeight : 24;
+              this.column = cs.alternateWidth ? cs.alternateWidth : 80;
+            }
+            this.connectionSettings = cs;
           }
-          if (this.modType === "5") {
-            this.isDynamic = true;
-            this.row = cs.alternateHeight ? cs.alternateHeight : 24;
-            this.column = cs.alternateWidth ? cs.alternateWidth : 80;
-          }
-          this.connectionSettings = cs;
-        }
-        break;
-      default:
-        
+          break;
+        default:
+
       }
     }
     this.adjustTerminal(TOGGLE_MENU_BUTTON_PX);
@@ -140,48 +141,48 @@ export class AppComponent implements AfterViewInit {
   }
 
   ngOnInit(): void {
-    this.viewportEvents.registerCloseHandler(():Promise<void>=> {
-      return new Promise((resolve,reject)=> {
+    this.viewportEvents.registerCloseHandler((): Promise<void> => {
+      return new Promise((resolve, reject) => {
         this.ngOnDestroy();
         resolve();
       });
     });
   }
-  
-  modTypeChange(value:string): void {
+
+  modTypeChange(value: string): void {
     this.isDynamic = (value === "5");
   }
 
   ngAfterViewInit(): void {
-    let log:ZLUX.ComponentLogger = this.log;
+    let log: ZLUX.ComponentLogger = this.log;
     log.debug('START: Tn3270 ngAfterViewInit');
-    let dispatcher: ZLUX.Dispatcher = ZoweZLUX.dispatcher; 
+    let dispatcher: ZLUX.Dispatcher = ZoweZLUX.dispatcher;
     const terminalElement = this.terminalElementRef.nativeElement;
     const terminalParentElement = this.terminalParentElementRef.nativeElement;
     this.terminal = new Terminal(terminalElement, terminalParentElement, this.http, this.pluginDefinition, this.log);
     this.viewportEvents.resized.subscribe(() => this.terminal.performResize());
     if (this.windowActions) {
-      this.terminal.contextMenuEmitter.subscribe( (info) => {
-        let screenContext:any = info.screenContext;
+      this.terminal.contextMenuEmitter.subscribe((info) => {
+        let screenContext: any = info.screenContext;
         screenContext["sourcePluginID"] = this.pluginDefinition.getBasePlugin().getIdentifier();
-        let recognizers:any[] = dispatcher.getRecognizers(screenContext);
-        let menuItems:ContextMenuItem[] = [];
-        for (let recognizer of recognizers){
+        let recognizers: any[] = dispatcher.getRecognizers(screenContext);
+        let menuItems: ContextMenuItem[] = [];
+        for (let recognizer of recognizers) {
           let action = dispatcher.getAction(recognizer);
-          log.debug("Recognizer="+JSON.stringify(recognizer)+" action="+action);
-          if (action){
+          log.debug("Recognizer=" + JSON.stringify(recognizer) + " action=" + action);
+          if (action) {
             let menuCallback = () => {
-              dispatcher.invokeAction(action,info.screenContext);
+              dispatcher.invokeAction(action, info.screenContext);
             }
             // menu items can also have children
-            menuItems.push({text: action.getDefaultName(), action: menuCallback});
+            menuItems.push({ text: action.getDefaultName(), action: menuCallback });
           }
         }
         this.windowActions.spawnContextMenu(info.x, info.y, menuItems);
       });
     }
     this.keySequencesReload();
-    this.terminal.wsErrorEmitter.subscribe((error: TerminalWebsocketError)=> this.onWSError(error));
+    this.terminal.wsErrorEmitter.subscribe((error: TerminalWebsocketError) => this.onWSError(error));
     if (!this.connectionSettings) {
       this.loadConfig().subscribe((config: ConfigServiceTerminalConfig) => {
 
@@ -189,7 +190,7 @@ export class AppComponent implements AfterViewInit {
         this.host = contents.host;
         this.port = contents.port;
         this.securityType = contents.security.type;
-        if (contents.deviceType) { this.modType = ''+contents.deviceType; }
+        if (contents.deviceType) { this.modType = '' + contents.deviceType; }
         if (this.modType === "5") {
           this.isDynamic = true;
         }
@@ -239,18 +240,18 @@ export class AppComponent implements AfterViewInit {
   }
 
   private onWSError(error: TerminalWebsocketError): void {
-    let message = "Terminal closed due to websocket error. Code="+error.code;
-    this.log.warn(message+", Reason="+error.reason);
+    let message = "Terminal closed due to websocket error. Code=" + error.code;
+    this.log.warn(message + ", Reason=" + error.reason);
     this.setError(ErrorType.websocket, message);
     this.disconnectAndUnsetTitle();
   }
 
-  private setError(type: ErrorType, message: string):void {
+  private setError(type: ErrorType, message: string): void {
     this.currentErrors.set(type, message);
     this.refreshErrorBar();
   }
 
-  private clearError(type: ErrorType):void {
+  private clearError(type: ErrorType): void {
     let hadError = this.currentErrors.get(type);
     this.currentErrors.set(type, null);
     if (hadError) {
@@ -258,7 +259,7 @@ export class AppComponent implements AfterViewInit {
     }
   }
 
-  private clearAllErrors():void {
+  private clearAllErrors(): void {
     this.currentErrors.clear();
     if (this.errorMessage.length > 0) {
       this.refreshErrorBar();
@@ -280,8 +281,8 @@ export class AppComponent implements AfterViewInit {
     if ((error && !hadError) || (!error && hadError)) {
       let offset: number = error ? CONFIG_MENU_ROW_PX : -CONFIG_MENU_ROW_PX;
       this.adjustTerminal(offset);
-    }    
-  }  
+    }
+  }
 
   toggleMenu(state: boolean, menuID: string): void {
     let rows: number;
@@ -303,37 +304,37 @@ export class AppComponent implements AfterViewInit {
   }
 
   private adjustTerminal(heightOffsetPx: number): void {
-    this.terminalHeightOffset += heightOffsetPx;    
+    this.terminalHeightOffset += heightOffsetPx;
     this.terminalDivStyle = {
       top: `${this.terminalHeightOffset}px`,
       height: `calc(100% - ${this.terminalHeightOffset}px)`
     };
     if (this.terminal) {
-      setTimeout(()=> {
+      setTimeout(() => {
         this.terminal.performResize();
-      },100);
+      }, 100);
     }
   }
 
   /* I expect a JSON here*/
   zluxOnMessage(eventContext: any): Promise<any> {
-    return new Promise((resolve,reject)=> {
+    return new Promise((resolve, reject) => {
       if (!eventContext || !eventContext.data) {
         return reject('Event context missing or malformed');
       }
       switch (eventContext.data.type) {
-      case 'disconnect':
-        resolve(this.disconnectAndUnsetTitle());
-        break;
-      case 'connectionInfo':
-        let hostInfo = this.terminal.virtualScreen.hostInfo;
-        this.log.debug('Hostinfo='+JSON.stringify(hostInfo));
-        resolve(hostInfo);
-        break;
-      default:
-        reject('Event context missing or unknown data.type');
+        case 'disconnect':
+          resolve(this.disconnectAndUnsetTitle());
+          break;
+        case 'connectionInfo':
+          let hostInfo = this.terminal.virtualScreen.hostInfo;
+          this.log.debug('Hostinfo=' + JSON.stringify(hostInfo));
+          resolve(hostInfo);
+          break;
+        default:
+          reject('Event context missing or unknown data.type');
       };
-    });    
+    });
   }
 
 
@@ -341,7 +342,7 @@ export class AppComponent implements AfterViewInit {
     return {
       onMessage: (eventContext: any): Promise<any> => {
         return this.zluxOnMessage(eventContext);
-      }      
+      }
     }
   }
 
@@ -370,7 +371,7 @@ export class AppComponent implements AfterViewInit {
   keySequncesLogDebug(keys: Keys): void {
     const debugPrexix = keys.normal ? `Normal: ${keys.normal}` :
       keys.special ? `Special : ${keys.special}` :
-      keys.prompt ? `Prompt : ${keys.prompt}` : null;
+        keys.prompt ? `Prompt : ${keys.prompt}` : null;
     if (debugPrexix) {
       this.log.debug(`${debugPrexix} Ctrl(${keys.ctrl}) Alt(${keys.alt}) Shift(${keys.shift})`);
     }
@@ -394,7 +395,7 @@ export class AppComponent implements AfterViewInit {
       this.keySequncesLogDebug(keys);
       for (let char = 0; char < keys.normal.length; char++) {
         textAreaElement.dispatchEvent(
-          new KeyboardEvent('keydown', {'key': keys.normal[char], shiftKey: keys.shift, ctrlKey: keys.ctrl, altKey: keys.alt})
+          new KeyboardEvent('keydown', { 'key': keys.normal[char], shiftKey: keys.shift, ctrlKey: keys.ctrl, altKey: keys.alt })
         );
       }
       return;
@@ -403,7 +404,7 @@ export class AppComponent implements AfterViewInit {
     if (keys.special) {
       this.keySequncesLogDebug(keys);
       textAreaElement.dispatchEvent(
-        new KeyboardEvent('keydown', {'key': keys.special, shiftKey: keys.shift, ctrlKey: keys.ctrl, altKey: keys.alt})
+        new KeyboardEvent('keydown', { 'key': keys.special, shiftKey: keys.shift, ctrlKey: keys.ctrl, altKey: keys.alt })
       );
       if (keys.special === 'Enter') {
         await new Promise(f => setTimeout(f, 1000));
@@ -416,7 +417,7 @@ export class AppComponent implements AfterViewInit {
       const promptValue = prompt(keys.prompt, '');
       this.log.debug(`Value: ${promptValue}`);
       for (let char = 0; char < promptValue.length; char++) {
-        textAreaElement.dispatchEvent(new KeyboardEvent('keydown', {'key': promptValue[char]}));
+        textAreaElement.dispatchEvent(new KeyboardEvent('keydown', { 'key': promptValue[char] }));
       }
     }
     return;
@@ -469,10 +470,10 @@ export class AppComponent implements AfterViewInit {
 
   private disconnectAndUnsetTitle() {
     this.terminal.close();
-    if (this.windowActions) {this.windowActions.setTitle(`TN3270 - Disconnected`);}
+    if (this.windowActions) { this.windowActions.setTitle(`TN3270 - Disconnected`); }
   }
 
-  private connectAndSetTitle(connectionSettings:any) {
+  private connectAndSetTitle(connectionSettings: any) {
     if (this.windowActions) {
       this.windowActions.setTitle(`TN3270 - ${connectionSettings.host}:${connectionSettings.port}`);
     }
@@ -481,9 +482,9 @@ export class AppComponent implements AfterViewInit {
   }
 
   private nameToCodepage(name) {
-    const stringName = isNaN(Number(name)) ? name : ''+name;
+    const stringName = isNaN(Number(name)) ? name : '' + name;
     for (let i = 0; i < this.charsets.length; i++) {
-      if ((this.charsets[i].name == stringName) || (this.charsets[i].name.startsWith(stringName+':'))) {
+      if ((this.charsets[i].name == stringName) || (this.charsets[i].name.startsWith(stringName + ':'))) {
         this.selectedCodepage = this.charsets[i].name;
         return this.selectedCodepage;
       }
@@ -516,8 +517,8 @@ export class AppComponent implements AfterViewInit {
     } else if (this.column < 0 || !Number.isInteger(this.column)) {
       this.setError(ErrorType.dimension, 'Column number missing or invalid');
     } else if ((this.row * this.column) > 16383) {
-      let rowMax = Math.ceil(16383/this.column);
-      let colMax = Math.ceil(16383/this.row);
+      let rowMax = Math.ceil(16383 / this.column);
+      let colMax = Math.ceil(16383 / this.row);
       this.setError(ErrorType.dimension, `Screen dimension above 16383, decrease row to below ${rowMax} or column to below ${colMax}`);
     } else if (this.errorMessage.length > 0) {
       this.clearError(ErrorType.dimension);
@@ -538,12 +539,12 @@ export class AppComponent implements AfterViewInit {
     } else {
       this.clearError(ErrorType.host);
     }
-  } 
+  }
 
 
   loadConfig(): Observable<ConfigServiceTerminalConfig> {
     this.log.warn("Config load is wrong and not abstracted");
-    return this.http.get<ConfigServiceTerminalConfig>(ZoweZLUX.uriBroker.pluginConfigForScopeUri(this.pluginDefinition.getBasePlugin(),'user','sessions','_defaultTN3270.json'))
+    return this.http.get<ConfigServiceTerminalConfig>(ZoweZLUX.uriBroker.pluginConfigForScopeUri(this.pluginDefinition.getBasePlugin(), 'user', 'sessions', '_defaultTN3270.json'))
   }
 
   loadZssSettings(): Observable<ZssConfig> {
@@ -562,9 +563,9 @@ export class AppComponent implements AfterViewInit {
         port: this.port,
         host: this.host,
         charsetName: this.selectedCodepage
-      }).subscribe((result: any)=> {
+      }).subscribe((result: any) => {
         this.log.debug('Save return');
-    });
+      });
   }
 }
 
