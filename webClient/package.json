@@ -29,6 +29,7 @@
     "@angular/router": "~18.0.0",
     "@ngtools/webpack": "^18.2.2",
     "compression-webpack-plugin": "^11.1.0",
+    "copy-webpack-plugin": "^12.0.2",
     "core-js": "^3.38.1",
     "css-loader": "^7.1.2",
     "rxjs": "~7.8.1",
