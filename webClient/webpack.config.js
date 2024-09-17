@@ -31,6 +31,7 @@ const config = {
     clean: true
   },
   resolve: {
+    extensions: ['.ts', '.js'],
     alias: {
       '~': path.resolve(__dirname, './node_modules/'),
     }
