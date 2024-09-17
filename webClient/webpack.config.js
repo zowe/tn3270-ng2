@@ -80,6 +80,11 @@ function deepMerge(base, extension) {
   }
 }
 
+module.exports = new webpackConfig.Config()
+  .extend(path.resolve(process.env.MVD_DESKTOP_DIR, 'plugin-config/webpack5.base.js'))
+  .merge(config);
+
+
 
 /*
   This program and the accompanying materials are
