@@ -86,7 +86,7 @@
           title="Reloads the key sequences config file.">
             (Reload)
         </div>
-        <ng-container *ngIf="keySequencesLoaded">
+        @if (keySequencesLoaded) {
           <div 
             class="key-sequence key-sequence-action" 
             *ngFor="let k of keySequences; let i=index"
@@ -94,12 +94,12 @@
             title="{{keySequences[i].description}}">
               [{{keySequences[i].title}}]
           </div>
-        </ng-container>
-        <ng-container *ngIf="!keySequencesLoaded">
+        }
+        @if (!keySequencesLoaded) {
           <div class="key-sequence key-sequence-warning">
             No key sequences definitions found.
           </div>
-        </ng-container>
+        }
       </div>
     </div>
   }
