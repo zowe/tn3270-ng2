@@ -11,7 +11,11 @@
     "launchDefinition": {
       "pluginShortNameKey": "TN3270",
       "pluginShortNameDefault": "TN3270",
-      "imageSrc": "assets/icon.png"
+      "imageSrc": "assets/v3/icon.png"
+    },
+     "entryPoint": {
+      "2.0": "main.js",
+      "3.0": "v3/main.js"
     },
     "descriptionKey": "TN3270 Description",
     "descriptionDefault": "Basic TN3270 Display Emulator",

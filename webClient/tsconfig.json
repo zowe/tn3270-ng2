@@ -2,6 +2,7 @@
   "extends": "../../zlux-app-manager/virtual-desktop/plugin-config/tsconfig.base.json",
   "include": [
     "src/**/*.ts",
+    "src/plugin.ts",
     "../../zlux-platform/interface/src/mvd-hosting.d.ts"
   ],
   "compilerOptions": {

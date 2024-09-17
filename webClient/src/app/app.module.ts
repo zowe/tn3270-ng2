@@ -10,8 +10,9 @@
   Copyright Contributors to the Zowe Project.
 */
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { provideHttpClient } from '@angular/common/http';
 import { NgModule } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 
 
 import { AppComponent } from './app.component';
@@ -24,8 +25,9 @@ import { AppComponent } from './app.component';
     CommonModule,
     FormsModule
   ],
-  providers: [],
-  entryComponents: [AppComponent]
+  providers: [
+    provideHttpClient()
+  ]
 })
 export class AppModule { }
 
