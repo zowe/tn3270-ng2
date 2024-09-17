@@ -15,6 +15,7 @@ const CopyWebpackPlugin = require('copy-webpack-plugin');
 const CompressionPlugin = require('compression-webpack-plugin');
 const baseConfig = require(path.resolve(process.env.MVD_DESKTOP_DIR, 'plugin-config/webpack5.base.js'));
 const AotPlugin = require('@ngtools/webpack').AngularWebpackPlugin;
+var webpackConfig = require('webpack-config');
 
 if (process.env.MVD_DESKTOP_DIR == null) {
   throw new Error('You must specify MVD_DESKTOP_DIR in your environment');
@@ -67,22 +68,7 @@ const config = {
   ]
 };
 
-function deepMerge(base, extension) {
-  if (isObject(base) && isObject(extension)) {
-    for (const key in extension) {
-      if (isObject(extension[key])) {
-        if (!base[key]) base[key] = {};
-        deepMerge(base[key], extension[key]);
-      } else {
-        Object.assign(base, { [key]: extension[key] });
-      }
-    }
-  }
-}
-
-module.exports = new webpackConfig.Config()
-  .extend(path.resolve(process.env.MVD_DESKTOP_DIR, 'plugin-config/webpack5.base.js'))
-  .merge(config);
+module.exports = config;
 
 
 
