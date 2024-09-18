@@ -11,7 +11,7 @@
     "launchDefinition": {
       "pluginShortNameKey": "TN3270",
       "pluginShortNameDefault": "TN3270",
-      "imageSrc": "assets/v3/icon.png"
+      "imageSrc": "v3/assets/icon.png"
     },
      "entryPoint": {
       "2.0": "main.js",
@@ -39,16 +39,6 @@
       "sourceName": "tn3270data",
       "sourcePlugin": "org.zowe.terminal.proxy",
       "versionRange": "^1.0.0"
-    },
-    {
-      "type": "service",
-      "name": "statediscovery",
-      "initializerLookupMethod": "internal",
-      "initializerName": "zosDiscoveryServiceInstaller",
-      "methods": [
-        "GET"
-      ],
-      "version": "1.0.0"
     }
   ]
 }
