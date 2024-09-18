@@ -17,10 +17,10 @@
   @if (showConnectionMenu) {
     <button class="toggle-menu contract-menu" type="submit" (click)="toggleMenu(false, 'connectionMenu')" title="Hide"></button>
   }
-  @if (!showConnectionMenu) {
+  @if (!showKeySequencesMenu) {
     <button class="toggle-menu expand-menu" type="submit" (click)="toggleMenu(true, 'keySequencesMenu')" title="Key Sequences"></button>
   }
-  @if (showConnectionMenu) {
+  @if (showKeySequencesMenu) {
   <button class="toggle-menu contract-menu" type="submit" (click)="toggleMenu(false, 'keySequencesMenu')" title="Hide"></button> 
   }
 
