@@ -68,7 +68,25 @@ const config = {
   ]
 };
 
-module.exports = config;
+function deepMerge(base, extension) {
+  if (isObject(base) && isObject(extension)) {
+    for (const key in extension) {
+      if (isObject(extension[key])) {
+        if (!base[key]) base[key] = {};
+        deepMerge(base[key], extension[key]);
+      } else {
+        Object.assign(base, { [key]: extension[key] });
+      }
+    }
+  }
+  return base;
+}
+
+function isObject(item) {
+  return (item && typeof item === 'object' && !Array.isArray(item));
+}
+
+module.exports = deepMerge(baseConfig, config);
 
 
 
