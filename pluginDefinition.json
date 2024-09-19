@@ -11,7 +11,11 @@
     "launchDefinition": {
       "pluginShortNameKey": "TN3270",
       "pluginShortNameDefault": "TN3270",
-      "imageSrc": "assets/icon.png"
+      "imageSrc": "v3/assets/icon.png"
+    },
+     "entryPoint": {
+      "2.0": "main.js",
+      "3.0": "v3/main.js"
     },
     "descriptionKey": "TN3270 Description",
     "descriptionDefault": "Basic TN3270 Display Emulator",
@@ -35,16 +39,6 @@
       "sourceName": "tn3270data",
       "sourcePlugin": "org.zowe.terminal.proxy",
       "versionRange": "^1.0.0"
-    },
-    {
-      "type": "service",
-      "name": "statediscovery",
-      "initializerLookupMethod": "internal",
-      "initializerName": "zosDiscoveryServiceInstaller",
-      "methods": [
-        "GET"
-      ],
-      "version": "1.0.0"
     }
   ]
 }

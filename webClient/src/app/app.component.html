@@ -11,91 +11,105 @@
 -->
 
 <div class="tn3270-parent" #terminalParent>
-  <button class="toggle-menu expand-menu" *ngIf="!showConnectionMenu" type="submit" (click)="toggleMenu(true, 'connectionMenu')" title="Connection setting"></button>
-  <button class="toggle-menu contract-menu" *ngIf="showConnectionMenu" type="submit" (click)="toggleMenu(false, 'connectionMenu')" title="Hide"></button>
-  <button class="toggle-menu expand-menu" *ngIf="!showKeySequencesMenu" type="submit" (click)="toggleMenu(true, 'keySequencesMenu')" title="Key Sequences"></button>
-  <button class="toggle-menu contract-menu" *ngIf="showKeySequencesMenu" type="submit" (click)="toggleMenu(false, 'keySequencesMenu')" title="Hide"></button> 
+  @if (!showConnectionMenu) {
+    <button class="toggle-menu expand-menu" type="submit" (click)="toggleMenu(true, 'connectionMenu')" title="Connection setting"></button>
+  }
+  @if (showConnectionMenu) {
+    <button class="toggle-menu contract-menu" type="submit" (click)="toggleMenu(false, 'connectionMenu')" title="Hide"></button>
+  }
+  @if (!showKeySequencesMenu) {
+    <button class="toggle-menu expand-menu" type="submit" (click)="toggleMenu(true, 'keySequencesMenu')" title="Key Sequences"></button>
+  }
+  @if (showKeySequencesMenu) {
+  <button class="toggle-menu contract-menu" type="submit" (click)="toggleMenu(false, 'keySequencesMenu')" title="Hide"></button> 
+  }
 
-  <div *ngIf="showConnectionMenu" class="toolbar" title="Connection setting">
-    <div class="form-group toolbar-row">
-      <label class="col-sm-1 col-form-label">Host</label>
-      <div class="toolbar-input col-sm-2">
-        <input class="form-control" [disabled]="isInputDisabled" required minlength="1" (input)="validateHost()" [(ngModel)]="host">
+  @if (showConnectionMenu) {
+    <div class="toolbar" title="Connection setting">
+      <div class="form-group toolbar-row">
+        <label class="col-sm-1 col-form-label">Host</label>
+        <div class="toolbar-input col-sm-2">
+          <input class="form-control" [disabled]="isInputDisabled" required minlength="1" (input)="validateHost()" [(ngModel)]="host">
+        </div>
+        <label class="col-sm-1 col-form-label">Port</label>
+        <div class="toolbar-input col-sm-1">
+          <input type="number" class="form-control" [disabled]="isInputDisabled" required min="0" max="65535" (input)="validatePort()" [(ngModel)]="port">
+        </div>
+        <label class="col-sm-1 col-form-label">Type</label>
+        <div class="toolbar-input col-sm-2">
+          <select [(ngModel)]="securityType" [disabled]="isInputDisabled" class="form-control">
+            <option value="telnet">Telnet</option>
+            <option value="tls">TLS</option>
+          </select>
+        </div>
+        <label class="col-sm-1 col-form-label">Mod</label>
+        <div class="toolbar-input col-sm-2">
+          <select [(ngModel)]="modType" (change)="modTypeChange($event.target.value)" [disabled]="isInputDisabled" class="form-control">
+            <option value="1">2 (24x80)</option>
+            <option value="2">3 (32x80)</option>
+            <option value="3">4 (43x80)</option>
+            <option value="4">5 (27x132)</option>
+            <option value="5">Dynamic</option>
+          </select>
+        </div>      
+        <div class="terminal-button">
+          <button type="submit" class="power-toggle-button btn" [style.background-color]="powerButtonColor" [disabled]="disableButton" (click)="toggleConnection()"></button>
+        </div>
       </div>
-      <label class="col-sm-1 col-form-label">Port</label>
-      <div class="toolbar-input col-sm-1">
-        <input type="number" class="form-control" [disabled]="isInputDisabled" required min="0" max="65535" (input)="validatePort()" [(ngModel)]="port">
-      </div>
-      <label class="col-sm-1 col-form-label">Type</label>
-      <div class="toolbar-input col-sm-2">
-        <select [(ngModel)]="securityType" [disabled]="isInputDisabled" class="form-control">
-          <option value="telnet">Telnet</option>
-          <option value="tls">TLS</option>
-        </select>
-      </div>
-      <label class="col-sm-1 col-form-label">Mod</label>
-      <div class="toolbar-input col-sm-2">
-        <select [(ngModel)]="modType" (change)="modTypeChange($event.target.value)" [disabled]="isInputDisabled" class="form-control">
-          <option value="1">2 (24x80)</option>
-          <option value="2">3 (32x80)</option>
-          <option value="3">4 (43x80)</option>
-          <option value="4">5 (27x132)</option>
-          <option value="5">Dynamic</option>
-        </select>
-      </div>      
-      <div class="terminal-button">
-        <button type="submit" class="power-toggle-button btn" [style.background-color]="powerButtonColor" [disabled]="disableButton" (click)="toggleConnection()"></button>
+      <div class="form-group toolbar-row" style="width: 100%; height:40px">
+        <label class="col-sm-1 col-form-label">Column</label>
+        <div class="toolbar-input col-sm-2">
+          <input type="number" [disabled]="!isDynamic || isInputDisabled" required min="1" max="16383" class="form-control" (input)="validateScreenDimension()" [(ngModel)]="column">
+        </div> 
+        <label class="col-sm-1 col-form-label">Row</label>
+        <div class="toolbar-input col-sm-1">
+          <input type="number" [disabled]="!isDynamic || isInputDisabled" required min="1" max="16383" class="form-control" (input)="validateScreenDimension()" [(ngModel)]="row">
+        </div>
+        <label class="col-sm-2 col-form-label">Codepage</label>
+        <div class="toolbar-input col-sm-4">
+          <select [(ngModel)]="selectedCodepage" [disabled]="isInputDisabled" class="form-control">
+            <option [ngValue]="i.name" *ngFor="let i of charsets">{{i.name}}</option>
+          </select>
+        </div>
+        <button class="terminal-button save-button" type="submit" (click)="saveSettings()">
+          <i class="fa fa-save"></i>
+        </button>
       </div>
     </div>
-    <div class="form-group toolbar-row" style="width: 100%; height:40px">
-      <label class="col-sm-1 col-form-label">Column</label>
-      <div class="toolbar-input col-sm-2">
-        <input type="number" [disabled]="!isDynamic || isInputDisabled" required min="1" max="16383" class="form-control" (input)="validateScreenDimension()" [(ngModel)]="column">
-      </div> 
-      <label class="col-sm-1 col-form-label">Row</label>
-      <div class="toolbar-input col-sm-1">
-        <input type="number" [disabled]="!isDynamic || isInputDisabled" required min="1" max="16383" class="form-control" (input)="validateScreenDimension()" [(ngModel)]="row">
-      </div>
-      <label class="col-sm-2 col-form-label">Codepage</label>
-      <div class="toolbar-input col-sm-4">
-        <select [(ngModel)]="selectedCodepage" [disabled]="isInputDisabled" class="form-control">
-          <option [ngValue]="i.name" *ngFor="let i of charsets">{{i.name}}</option>
-        </select>
-      </div>
-      <button class="terminal-button save-button" type="submit" (click)="saveSettings()">
-        <i class="fa fa-save"></i>
-      </button>
-    </div>
-  </div>
-  <div class="toolbar" style="width: 100%; height:40px" *ngIf="showKeySequencesMenu" title="Key sequences">
-    <div class="form-group toolbar-row">
-      <div 
-        class="key-sequence key-sequence-menu"
-        (click)="keySequencesReload()"
-        title="Reloads the key sequences config file.">
-          (Reload)
-      </div>
-      <ng-container *ngIf="keySequencesLoaded">
+  }
+  @if (showKeySequencesMenu) {
+    <div class="toolbar" style="width: 100%; height:40px" title="Key sequences">
+      <div class="form-group toolbar-row">
         <div 
-          class="key-sequence key-sequence-action" 
-          *ngFor="let k of keySequences; let i=index"
-          (click)="keySequenceAction(i)"
-          title="{{keySequences[i].description}}">
-            [{{keySequences[i].title}}]
+          class="key-sequence key-sequence-menu"
+          (click)="keySequencesReload()"
+          title="Reloads the key sequences config file.">
+            (Reload)
         </div>
-      </ng-container>
-      <ng-container *ngIf="!keySequencesLoaded">
-        <div class="key-sequence key-sequence-warning">
-          No key sequences definitions found.
-        </div>
-      </ng-container>
+        @if (keySequencesLoaded) {
+          <div 
+            class="key-sequence key-sequence-action" 
+            *ngFor="let k of keySequences; let i=index"
+            (click)="keySequenceAction(i)"
+            title="{{keySequences[i].description}}">
+              [{{keySequences[i].title}}]
+          </div>
+        }
+        @if (!keySequencesLoaded) {
+          <div class="key-sequence key-sequence-warning">
+            No key sequences definitions found.
+          </div>
+        }
+      </div>
     </div>
-  </div>
-  <div class="toolbar" *ngIf="errorMessage.length > 0" style="height:40px"> 
-    <div class="row toolbar-row">
-      <label class="col-form-label error-label">Error: {{errorMessage}}</label>
+  }
+  @if (errorMessage.length > 0) {
+    <div class="toolbar" style="height:40px"> 
+      <div class="row toolbar-row">
+        <label class="col-form-label error-label">Error: {{errorMessage}}</label>
+      </div>
     </div>
-  </div>
+  }
   <div class="tn3270" [ngStyle]="terminalDivStyle" #terminal>
   </div>  
 </div>
