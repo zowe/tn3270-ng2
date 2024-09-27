@@ -39,6 +39,16 @@
       "sourceName": "tn3270data",
       "sourcePlugin": "org.zowe.terminal.proxy",
       "versionRange": "^1.0.0"
+    },
+    {
+      "type": "service",
+      "name": "statediscovery",
+      "initializerLookupMethod": "internal",
+      "initializerName": "zosDiscoveryServiceInstaller",
+      "methods": [
+        "GET"
+      ],
+      "version": "1.0.0"
     }
   ]
 }
