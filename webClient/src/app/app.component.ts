@@ -19,6 +19,8 @@ import { Angular2InjectionTokens, Angular2PluginWindowActions, Angular2PluginVie
 import { Terminal, TerminalWebsocketError} from './terminal';
 import { ConfigServiceTerminalConfig, ZssConfig, KeySequencesConfig, KeySequence, Keys } from './terminal.config';
 
+import './app.component.css';
+
 const TOGGLE_MENU_BUTTON_PX = 16; //with padding
 const CONFIG_MENU_ROW_PX = 40;
 const CONFIG_MENU_PAD_PX = 4;
@@ -68,7 +70,6 @@ class ErrorState {
 @Component({
   selector: 'com-rs-mvd-tn3270',
   templateUrl: './app.component.html',
-  styleUrls: ['./app.component.css']
 })
 export class AppComponent implements AfterViewInit {
   @ViewChild('terminal')

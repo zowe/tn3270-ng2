@@ -10,33 +10,60 @@
   Copyright Contributors to the Zowe Project.
 */
 
-var path = require('path');
-var CopyWebpackPlugin = require('copy-webpack-plugin');
+const path = require('path');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
 const CompressionPlugin = require('compression-webpack-plugin');
-const baseConfig = require(path.resolve(process.env.MVD_DESKTOP_DIR, 'plugin-config/webpack.base.js'));
+const baseConfig = require(path.resolve(process.env.MVD_DESKTOP_DIR, 'plugin-config/webpack5.base.js'));
+const AotPlugin = require('@ngtools/webpack').AngularWebpackPlugin;
 
 if (process.env.MVD_DESKTOP_DIR == null) {
   throw new Error('You must specify MVD_DESKTOP_DIR in your environment');
 }
 
-var config = {
-  'entry': [
+const config = {
+  devtool: 'source-map',
+  entry: [
     path.resolve(__dirname, './src/plugin.ts')
   ],
-  'output': {
-    'path': path.resolve(__dirname, '../web'),
-    'filename': 'main.js',
+  output: {
+    path: path.resolve(__dirname, '../web/v3'),
+    filename: '[name].js',
+    clean: true
   },
-  'plugins': [
-    new CopyWebpackPlugin([
+  resolve: {
+    extensions: ['.ts', '.js'],
+    alias: {
+      '~': path.resolve(__dirname, './node_modules/'),
+    }
+  },
+  module: {
+    rules: [
       {
-        from: path.resolve(__dirname, './src/assets'),
-        to: path.resolve('../web/assets')
+        test: /(?:\.ngfactory\.js|\.ngstyle\.js|\.ts)$/,
+        use: ['@ngtools/webpack']
+      },
+      {
+        test: /\.css$/i,
+        use: ["style-loader", "css-loader"],
       }
-    ]),
+    ]
+  },
+  plugins: [
+    new CopyWebpackPlugin({
+      patterns: [
+        {
+          from: path.resolve(__dirname, './src/assets/icon.png'),
+          to: path.resolve('../web/v3/assets/icon.png')
+        }
+      ]
+    }),
     new CompressionPlugin({
       threshold: 100000,
       minRatio: 0.8
+    }),
+    new AotPlugin({
+      tsConfigPath: './tsconfig.json',
+      entryModule: './webClient/src/app/app.module.ts#AppModule'
     })
   ]
 };
@@ -48,7 +75,7 @@ function deepMerge(base, extension) {
         if (!base[key]) base[key] = {};
         deepMerge(base[key], extension[key]);
       } else {
-        Object.assign(base, {[key]: extension[key]});
+        Object.assign(base, { [key]: extension[key] });
       }
     }
   }
@@ -60,6 +87,7 @@ function isObject(item) {
 }
 
 module.exports = deepMerge(baseConfig, config);
+
 
 
 /*
