@@ -2,7 +2,7 @@
 name: tn3270-ng2
 id: org.zowe.terminal.tn3270
 # Without the v
-version: 3.0.0
+version: 3.1.0
 # Human readable component name
 title: TN3270
 # Human readable component description
