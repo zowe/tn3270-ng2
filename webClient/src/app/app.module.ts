@@ -12,7 +12,7 @@
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { NgModule } from '@angular/core';
-
+import { provideHttpClient } from '@angular/common/http';
 
 import { AppComponent } from './app.component';
 
@@ -24,8 +24,9 @@ import { AppComponent } from './app.component';
     CommonModule,
     FormsModule
   ],
-  providers: [],
-  entryComponents: [AppComponent]
+  providers: [
+    provideHttpClient()
+  ]
 })
 export class AppModule { }
 
