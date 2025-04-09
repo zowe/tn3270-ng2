@@ -1,7 +1,7 @@
 {
   "identifier": "org.zowe.terminal.tn3270",
   "apiVersion": "2.0.0",
-  "pluginVersion": "2.18.0",
+  "pluginVersion": "2.18.1",
   "pluginType": "application",
   "license": "EPL-2.0",
   "author": "Zowe",
