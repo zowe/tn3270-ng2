@@ -10,6 +10,9 @@ This an App that presents a TN3270 emulator within the Zowe UI environment.
 
 **To request features or report bugs, please use the issues page at the [zlux repo](https://github.com/zowe/zlux/issues) with the terminal, app, or tn3270-ng2 tags**
 
+## Usage
+See the Zowe documentation: https://docs.zowe.org/stable/user-guide/mvd-3270/
+
 ## Building
 See the Zowe documentation: https://docs.zowe.org/stable/extend/extend-desktop/mvd-buildingplugins/
 
