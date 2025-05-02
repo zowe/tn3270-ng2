@@ -1,5 +1,3 @@
-
-
 /*
   This program and the accompanying materials are
   made available under the terms of the Eclipse Public License v2.0 which accompanies
@@ -10,15 +8,15 @@
   Copyright Contributors to the Zowe Project.
 */
 
+if (process.env.MVD_DESKTOP_DIR == null) {
+  throw new Error('You must specify MVD_DESKTOP_DIR in your environment');
+}
+
 const path = require('path');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const CompressionPlugin = require('compression-webpack-plugin');
 const baseConfig = require(path.resolve(process.env.MVD_DESKTOP_DIR, 'plugin-config/webpack5.base.js'));
 const AotPlugin = require('@ngtools/webpack').AngularWebpackPlugin;
-
-if (process.env.MVD_DESKTOP_DIR == null) {
-  throw new Error('You must specify MVD_DESKTOP_DIR in your environment');
-}
 
 const config = {
   devtool: 'source-map',
@@ -88,8 +86,6 @@ function isObject(item) {
 
 module.exports = deepMerge(baseConfig, config);
 
-
-
 /*
   This program and the accompanying materials are
   made available under the terms of the Eclipse Public License v2.0 which accompanies
@@ -99,4 +95,3 @@ module.exports = deepMerge(baseConfig, config);
   
   Copyright Contributors to the Zowe Project.
 */
-
