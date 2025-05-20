@@ -109,6 +109,7 @@ export class Terminal {
                                    null,{contextCallback:contextCallback,
                                          screenLoadedCallback: screenLoadedCallback,
                                          wsErrorCallback: wsErrorCallback});
+    this.virtualScreen.destructiveBackspace = true;
   }
 
   isConnected(): boolean {
