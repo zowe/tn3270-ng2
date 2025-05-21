@@ -18,7 +18,8 @@ export class TerminalConfig {
     public deviceType?: number,
     public alternateHeight?: number,
     public alternateWidth?: number,
-    public charsetName?: string
+    public charsetName?: string,
+    public destructiveBackspace?: boolean
   ) {
 
   }

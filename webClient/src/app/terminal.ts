@@ -109,7 +109,7 @@ export class Terminal {
                                    null,{contextCallback:contextCallback,
                                          screenLoadedCallback: screenLoadedCallback,
                                          wsErrorCallback: wsErrorCallback});
-    this.virtualScreen.destructiveBackspace = true;
+    this.virtualScreen.destructiveBackspace = connectionSettings.destructiveBackspace;
   }
 
   isConnected(): boolean {
@@ -127,6 +127,13 @@ export class Terminal {
     if (this.virtualScreen) {
       this.virtualScreen.handleContainerResizeFromUI(this.terminalElement, this.virtualScreen);
     }
+  }
+
+  setDestructiveBackspace(value: boolean) {
+    if (!this.isConnected()) {
+        throw new Error("Terminal not connected"); // designed time error, so no logging
+    }
+    return this.virtualScreen.destructiveBackspace = value;
   }
 }
 
