@@ -131,7 +131,7 @@ export class Terminal {
 
   setDestructiveBackspace(value: boolean) {
     if (!this.isConnected()) {
-        throw new Error("Terminal not connected"); // designed time error, so no logging
+        throw new Error("Terminal not connected"); // design-time error, so raising exception instead of logging
     }
     return this.virtualScreen.destructiveBackspace = value;
   }

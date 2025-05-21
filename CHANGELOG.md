@@ -1,5 +1,8 @@
 # Basic TN3270 Display Emulator Changelog
 
+## `3.0.1`
+- Parameterized the behavior of the Backspace key. Now its behavior can be changed both in the config file and on the GUI. (A new checkbox is added to the connection settings tool bar.)
+
 ## `3.0.0`
 - Enhancement: TN3270 always sent that CCSID=37 is used, when communicating with host. Following CCSIDs are now correctly identified: 037, 273, 275, 277, 278, 280, 284, 285, 297, 424, 437, 500, 870, 871, 875, 924, 1025, 1047, 1140, 1141, 1142, 1143,1144, 1145, 1146, 1147, 1148.
 
