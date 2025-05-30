@@ -24,7 +24,7 @@ import './app.component.css';
 const TOGGLE_MENU_BUTTON_PX = 16; //with padding
 const CONFIG_MENU_ROW_PX = 40;
 const CONFIG_MENU_PAD_PX = 4;
-const CONFIG_MENU_SIZE_PX = (CONFIG_MENU_ROW_PX*2)+CONFIG_MENU_PAD_PX; //40 per row, plus 2 px padding
+const CONFIG_MENU_SIZE_PX = (CONFIG_MENU_ROW_PX*3)+CONFIG_MENU_PAD_PX; //40 per row, plus 2 px padding
 
 enum ErrorType {
   host,
@@ -88,6 +88,7 @@ export class AppComponent implements AfterViewInit {
   column: number;
   charsets: Array<any> = org_zowe_terminal_tn3270.TERMINAL_DEFAULT_CHARSETS;
   selectedCodepage: string = "1047: International";
+  destructiveBackspace: boolean = false;
   terminalDivStyle: any;
   showConnectionMenu: boolean;
   showKeySequencesMenu: boolean;
@@ -197,6 +198,7 @@ export class AppComponent implements AfterViewInit {
         if (contents.alternateHeight) { this.row = contents.alternateHeight; }
         if (contents.alternateWidth) { this.column = contents.alternateWidth; }
         if (contents.charsetName) { this.selectedCodepage = contents.charsetName; }
+        if (contents.destructiveBackspace) { this.destructiveBackspace = contents.destructiveBackspace; }
         this.checkZssProxy().then(() => {
           this.connectionSettings = {
             host: this.host,
@@ -207,7 +209,8 @@ export class AppComponent implements AfterViewInit {
             deviceType: Number(this.modType),
             alternateHeight: this.row,
             alternateWidth: this.column,
-            charsetName: this.selectedCodepage
+            charsetName: this.selectedCodepage,
+            destructiveBackspace: this.destructiveBackspace
           }
           this.connectAndSetTitle(this.connectionSettings);
         })
@@ -229,7 +232,8 @@ export class AppComponent implements AfterViewInit {
         deviceType: Number(this.modType),
         alternateHeight: this.row,
         alternateWidth: this.column,
-        charsetName: this.selectedCodepage
+        charsetName: this.selectedCodepage,
+        destructiveBackspace: this.destructiveBackspace
       }, this.connectionSettings));
     }
     log.debug('END: Tn3270 ngAfterViewInit');
@@ -290,7 +294,7 @@ export class AppComponent implements AfterViewInit {
 
     if (menuID === 'connectionMenu') {
       this.showConnectionMenu = state;
-      rows = 2;
+      rows = 3;
       menuPadding = this.showKeySequencesMenu ? 0 : 1;
     }
     if (menuID === 'keySequencesMenu') {
@@ -463,7 +467,8 @@ export class AppComponent implements AfterViewInit {
         deviceType: Number(this.modType),
         alternateHeight: this.row,
         alternateWidth: this.column,
-        charsetName: this.selectedCodepage
+        charsetName: this.selectedCodepage,
+        destructiveBackspace: this.destructiveBackspace
       });
     }
   }
@@ -494,11 +499,11 @@ export class AppComponent implements AfterViewInit {
 
   //identical to isConnected for now, unless there's another reason to disable input
   get isInputDisabled(): boolean {
-    return this.terminal.isConnected();
+    return this.isConnected;
   }
 
   get isConnected(): boolean {
-    return this.terminal.isConnected();
+    return this.terminal && this.terminal.isConnected();
   }
 
   get powerButtonColor(): string {
@@ -508,6 +513,17 @@ export class AppComponent implements AfterViewInit {
       return "#17da38";
     } else {
       return "#b9b9b9";
+    }
+  }
+
+  get destructiveBackspaceValue(): boolean {
+    return this.destructiveBackspace;
+  }
+
+  set destructiveBackspaceValue(value: boolean) {
+    this.destructiveBackspace = value;
+    if (this.isConnected) {
+        this.terminal.setDestructiveBackspace(value);
     }
   }
 
@@ -562,7 +578,8 @@ export class AppComponent implements AfterViewInit {
         },
         port: this.port,
         host: this.host,
-        charsetName: this.selectedCodepage
+        charsetName: this.selectedCodepage,
+        destructiveBackspace: this.destructiveBackspace
       }).subscribe((result: any)=> {
         this.log.debug('Save return');
     });
