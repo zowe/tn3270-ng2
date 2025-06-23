@@ -100,6 +100,7 @@ export class AppComponent implements AfterViewInit {
   private terminalHeightOffset: number = 0;
   private currentErrors: ErrorState = new ErrorState();
   disableButton: boolean;
+  private luAttempts = 0;
 
   constructor(
     private http: HttpClient,
@@ -476,14 +477,14 @@ export class AppComponent implements AfterViewInit {
     }
   }
 
-  private disconnectAndUnsetTitle() {
+  private disconnectAndUnsetTitle(): void {
     this.terminal.close();
     if (this.windowActions) {
       this.windowActions.setTitle(`${TITLE_PREFIX}Disconnected`);
     }
   }
 
-  private setWindowTitle(host: string, port: number, terminal: any) {
+  private setWindowTitle(host: string, port: number, terminal: any): void {
     let title = `${TITLE_PREFIX}${host}:${port}`;
     if (terminal && terminal.luname !== null) {
       title += ` [${terminal.luname}]`
@@ -493,8 +494,7 @@ export class AppComponent implements AfterViewInit {
     }
   }
 
-  private luAttempts = 0;
-  private waitForLUName(terminal: any) {
+  private waitForLUName(terminal: any): void {
     if (terminal && terminal.luname !== null) {
       return this.setWindowTitle(this.connectionSettings.host, this.connectionSettings.port, this.terminal);
     } else {
@@ -505,7 +505,7 @@ export class AppComponent implements AfterViewInit {
     }
   }
 
-  private connectAndSetTitle(connectionSettings:any) {
+  private connectAndSetTitle(connectionSettings: any): void {
     this.setWindowTitle(connectionSettings.host, connectionSettings.port, undefined);
     connectionSettings.charsetName = this.nameToCodepage(connectionSettings.charsetName);
     this.terminal.connectToHost(connectionSettings);
@@ -514,7 +514,7 @@ export class AppComponent implements AfterViewInit {
     this.waitForLUName(this.terminal);
   }
 
-  private nameToCodepage(name) {
+  private nameToCodepage(name: any): string|undefined {
     const stringName = isNaN(Number(name)) ? name : ''+name;
     for (let i = 0; i < this.charsets.length; i++) {
       if ((this.charsets[i].name == stringName) || (this.charsets[i].name.startsWith(stringName+':'))) {
