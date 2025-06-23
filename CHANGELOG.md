@@ -1,6 +1,9 @@
 # Basic TN3270 Display Emulator Changelog
 
-## `3.0.1`
+## `3.3.0`
+- Enhancement: LU name is displayed the windows title [#102](https://github.com/zowe/tn3270-ng2/pull/102)
+
+## `3.1.0`
 - Enhancement: Parameterized behavior of the Backspace key: move cursor only (default) or delete characters. Configurable via config or GUI. [#100](https://github.com/zowe/tn3270-ng2/pull/100)
 
 ## `3.0.0`
