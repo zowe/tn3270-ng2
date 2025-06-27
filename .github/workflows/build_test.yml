@@ -147,7 +147,7 @@ jobs:
           JF_ARTIFACTORY_1: ${{ secrets.JF_ARTIFACTORY_TOKEN }}
 
       - name: '[Prep 5] prepare workflow'
-        uses: zowe-actions/zlux-builds/plugins/prepare-workflow@v3.x/main
+        uses: zowe-actions/zlux-builds/plugins/prepare-workflow@user/zhou/build-info-menifest
         with:
           github-user: ${{ secrets.ZOWE_ROBOT_USER }}
           github-password: ${{ secrets.ZOWE_ROBOT_TOKEN }}
