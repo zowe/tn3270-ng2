@@ -26,6 +26,7 @@ const CONFIG_MENU_ROW_PX = 40;
 const CONFIG_MENU_PAD_PX = 4;
 
 const TITLE_PREFIX = 'TN3270 - ';
+// Waiting in backround => other processing is not affected by this
 const LUNAME_MAX_ATTEMPTS = 24;
 const LUNAME_WAIT_TIME = 2500;
 
