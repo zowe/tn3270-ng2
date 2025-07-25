@@ -24,7 +24,11 @@ import './app.component.css';
 const TOGGLE_MENU_BUTTON_PX = 16; //with padding
 const CONFIG_MENU_ROW_PX = 40;
 const CONFIG_MENU_PAD_PX = 4;
-const CONFIG_MENU_SIZE_PX = (CONFIG_MENU_ROW_PX*3)+CONFIG_MENU_PAD_PX; //40 per row, plus 2 px padding
+
+const TITLE_PREFIX = 'TN3270 - ';
+// Waiting in backround => other processing is not affected by this
+const LUNAME_MAX_ATTEMPTS = 24;
+const LUNAME_WAIT_TIME = 2500;
 
 enum ErrorType {
   host,
@@ -97,6 +101,7 @@ export class AppComponent implements AfterViewInit {
   private terminalHeightOffset: number = 0;
   private currentErrors: ErrorState = new ErrorState();
   disableButton: boolean;
+  private luAttempts = 0;
 
   constructor(
     private http: HttpClient,
@@ -473,20 +478,44 @@ export class AppComponent implements AfterViewInit {
     }
   }
 
-  private disconnectAndUnsetTitle() {
+  private disconnectAndUnsetTitle(): void {
     this.terminal.close();
-    if (this.windowActions) {this.windowActions.setTitle(`TN3270 - Disconnected`);}
+    if (this.windowActions) {
+      this.windowActions.setTitle(`${TITLE_PREFIX}Disconnected`);
+    }
   }
 
-  private connectAndSetTitle(connectionSettings:any) {
-    if (this.windowActions) {
-      this.windowActions.setTitle(`TN3270 - ${connectionSettings.host}:${connectionSettings.port}`);
+  private setWindowTitle(host: string, port: number, terminal: any): void {
+    let title = `${TITLE_PREFIX}${host}:${port}`;
+    if (terminal && terminal.luname !== null) {
+      title += ` [${terminal.luname}]`
     }
+    if (this.windowActions) {
+      this.windowActions.setTitle(title);
+    }
+  }
+
+  private waitForLUName(terminal: any): void {
+    if (terminal && terminal.luname !== null) {
+      return this.setWindowTitle(this.connectionSettings.host, this.connectionSettings.port, this.terminal);
+    } else {
+      this.luAttempts ++;
+      if (this.luAttempts < LUNAME_MAX_ATTEMPTS) {
+        setTimeout(() => { this.waitForLUName(terminal); }, LUNAME_WAIT_TIME);
+      }
+    }
+  }
+
+  private connectAndSetTitle(connectionSettings: any): void {
+    this.setWindowTitle(connectionSettings.host, connectionSettings.port, undefined);
     connectionSettings.charsetName = this.nameToCodepage(connectionSettings.charsetName);
     this.terminal.connectToHost(connectionSettings);
+    this.luAttempts = 0;
+    this.terminal.luname = null;
+    this.waitForLUName(this.terminal);
   }
 
-  private nameToCodepage(name) {
+  private nameToCodepage(name: any): string|undefined {
     const stringName = isNaN(Number(name)) ? name : ''+name;
     for (let i = 0; i < this.charsets.length; i++) {
       if ((this.charsets[i].name == stringName) || (this.charsets[i].name.startsWith(stringName+':'))) {

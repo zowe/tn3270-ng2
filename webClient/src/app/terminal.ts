@@ -47,6 +47,7 @@ export type TerminalWebsocketError = {
 
 export class Terminal {
   virtualScreen: any;
+  luname: string;
   contextMenuEmitter: Subject<any> = new Subject();
   wsErrorEmitter: Subject<TerminalWebsocketError> = new Subject();
   constructor(
@@ -75,6 +76,7 @@ export class Terminal {
     let latestContext = {};
     const screenLoadedCallback = () => {
       helper.getAll(this.virtualScreen.getLUName()).subscribe(data=> {
+        this.luname = this.virtualScreen.getLUName();
         if (data?.rows?.length === 1) {
           latestContext = data.rows[0];
           this.log.debug("screenContext from discovery="+JSON.stringify(latestContext, null, 2));
@@ -121,6 +123,7 @@ export class Terminal {
       this.virtualScreen.closeConnection(4000, "Closed by user");
     }
     this.virtualScreen = null;
+    this.luname = null;
   }
 
   performResize() {
