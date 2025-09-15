@@ -1,0 +1,56 @@
+name: SonarQube Quality Check
+
+on:
+  push:
+    branches: [ "v3.x/staging" ]
+  pull_request:
+    branches: [ "v3.x/staging" ]
+    types: [opened, synchronize, reopened, ready_for_review]
+
+
+jobs:
+  analyze-pr:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    defaults:
+      run:
+        working-directory: webClient
+
+    steps:
+      - name: Checkout PR head with limited history
+        uses: actions/checkout@v4
+        with:
+          ref: v3.x/staging
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install npm
+        run: npm install
+
+      - name: Test with coverage (Jest)
+        run: npm test --if-present -- --coverage
+        env:
+          CI: true
+
+      - name: SonarQube Scan
+        continue-on-error: false
+        uses: sonarsource/sonarqube-scan-action@v5
+        env:
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          args: >
+            -Dsonar.projectKey=zowe_tn3270-ng2
+            -Dsonar.organization=zowe
+            -Dsonar.sources=webClient
+            -Dsonar.tests=webClient/src/app
+            -Dsonar.test.inclusions=**/*.(spec|test).ts,**/*.(spec|test).tsx,**/*.(spec|test).js,**/*.(spec|test).jsx
+            -Dsonar.exclusions=**/node_modules/**,**/dist/**,**/build/**,**/*.d.ts
+            -Dsonar.javascript.lcov.reportPaths=webClient/coverage/lcov.info
+            -Dsonar.qualitygate.wait=true
+            -Dsonar.qualitygate.timeout=600
