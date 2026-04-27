@@ -66,10 +66,14 @@
           <input type="number" [disabled]="!isDynamic || isInputDisabled" required min="1" max="16383" class="form-control" (input)="validateScreenDimension()" [(ngModel)]="row">
         </div>
         <label class="col-sm-2 col-form-label">Codepage</label>
-        <div class="toolbar-input col-sm-4">
+        <div class="toolbar-input col-sm-2">
           <select [(ngModel)]="selectedCodepage" [disabled]="isInputDisabled" class="form-control">
             <option [ngValue]="i.name" *ngFor="let i of charsets">{{i.name}}</option>
           </select>
+        </div>
+        <label class="col-sm-1 col-form-label">LU Name</label>
+        <div class="toolbar-input col-sm-1">
+          <input class="form-control" [disabled]="isInputDisabled" maxlength="8" placeholder="" [(ngModel)]="luname">
         </div>
         <button class="terminal-button save-button" type="submit" (click)="saveSettings()">
           <i class="fa fa-save"></i>

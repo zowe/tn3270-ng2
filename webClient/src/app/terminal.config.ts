@@ -19,7 +19,8 @@ export class TerminalConfig {
     public alternateHeight?: number,
     public alternateWidth?: number,
     public charsetName?: string,
-    public destructiveBackspace?: boolean
+    public destructiveBackspace?: boolean,
+    public luname?: string
   ) {
 
   }

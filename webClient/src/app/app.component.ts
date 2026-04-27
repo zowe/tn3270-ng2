@@ -85,6 +85,7 @@ export class AppComponent implements AfterViewInit {
   port:number;
   securityType:string;
   modType: string;
+  luname: string = '';
   connectionSettings: any;
   errorMessage: string = '';
   isDynamic: boolean;
@@ -128,6 +129,7 @@ export class AppComponent implements AfterViewInit {
             this.row = cs.alternateHeight ? cs.alternateHeight : 24;
             this.column = cs.alternateWidth ? cs.alternateWidth : 80;
           }
+          if (cs.luname) { this.luname = cs.luname; }
           this.connectionSettings = cs;
         }
         break;
@@ -204,6 +206,7 @@ export class AppComponent implements AfterViewInit {
         if (contents.alternateWidth) { this.column = contents.alternateWidth; }
         if (contents.charsetName) { this.selectedCodepage = contents.charsetName; }
         if (contents.destructiveBackspace) { this.destructiveBackspace = contents.destructiveBackspace; }
+        if (contents.luname) { this.luname = contents.luname; }
         this.checkZssProxy().then(() => {
           this.connectionSettings = {
             host: this.host,
@@ -215,7 +218,8 @@ export class AppComponent implements AfterViewInit {
             alternateHeight: this.row,
             alternateWidth: this.column,
             charsetName: this.selectedCodepage,
-            destructiveBackspace: this.destructiveBackspace
+            destructiveBackspace: this.destructiveBackspace,
+            sessionDeviceName: this.luname || undefined
           }
           this.connectAndSetTitle(this.connectionSettings);
         })
@@ -238,7 +242,8 @@ export class AppComponent implements AfterViewInit {
         alternateHeight: this.row,
         alternateWidth: this.column,
         charsetName: this.selectedCodepage,
-        destructiveBackspace: this.destructiveBackspace
+        destructiveBackspace: this.destructiveBackspace,
+        sessionDeviceName: this.luname || undefined
       }, this.connectionSettings));
     }
     log.debug('END: Tn3270 ngAfterViewInit');
@@ -473,7 +478,8 @@ export class AppComponent implements AfterViewInit {
         alternateHeight: this.row,
         alternateWidth: this.column,
         charsetName: this.selectedCodepage,
-        destructiveBackspace: this.destructiveBackspace
+        destructiveBackspace: this.destructiveBackspace,
+        sessionDeviceName: this.luname || undefined
       });
     }
   }
@@ -608,7 +614,8 @@ export class AppComponent implements AfterViewInit {
         port: this.port,
         host: this.host,
         charsetName: this.selectedCodepage,
-        destructiveBackspace: this.destructiveBackspace
+        destructiveBackspace: this.destructiveBackspace,
+        luname: this.luname || ''
       }).subscribe((result: any)=> {
         this.log.debug('Save return');
     });
