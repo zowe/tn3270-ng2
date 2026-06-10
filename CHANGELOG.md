@@ -1,5 +1,8 @@
 # Basic TN3270 Display Emulator Changelog
 
+## `3.6.0`
+- Bugfix: Do not log prompt value in debug mode [#107](https://github.com/zowe/tn3270-ng2/pull/107)
+
 ## `3.3.0`
 - Enhancement: LU name is displayed in the windows title [#101](https://github.com/zowe/tn3270-ng2/pull/101)
 
