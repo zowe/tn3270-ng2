@@ -414,7 +414,7 @@ export class AppComponent implements AfterViewInit {
     if (keys.prompt) {
       this.keySequncesLogDebug(keys);
       const promptValue = prompt(keys.prompt, '');
-      this.log.debug(`Value: ${promptValue}`);
+      this.log.debug(`Prompt value of length ${promptValue.length}`);
       for (let char = 0; char < promptValue.length; char++) {
         textAreaElement.dispatchEvent(new KeyboardEvent('keydown', {'key': promptValue[char]}));
       }
