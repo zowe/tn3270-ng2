@@ -69,7 +69,7 @@ export class Terminal {
 
     connectionSettings.url = ZoweZLUX.uriBroker.pluginWSUri(plugin, 'terminalstream', '');
     connectionSettings.connect = true;
-    connectionSettings.security.type = connectionSettings.security.type == 'tls' ? 2 : 0;
+    connectionSettings.security.type = connectionSettings.security.type == 'telnet' ? 0 : 2;
     // logic for using dispatcher goes here
     // should be in Tn3270Service.js eventually
     let latestContext = {};
