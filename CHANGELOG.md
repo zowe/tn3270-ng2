@@ -1,5 +1,8 @@
 # Basic TN3270 Display Emulator Changelog
 
+## `2.18.6`
+- Bugfix: if unknown security options is specified, fallback to `tls` [#110](https://github.com/zowe/tn3270-ng2/pull/110)
+
 ## `2.18.2`
 - Enhancement: TN3270 always sent that CCSID=37 is used, when communicating with host. Following CCSIDs are now correctly identified: 037, 273, 275, 277, 278, 280, 284, 285, 297, 424, 437, 500, 870, 871, 875, 924, 1025, 1047, 1140, 1141, 1142, 1143,1144, 1145, 1146, 1147, 1148.
 
