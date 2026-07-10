@@ -1,6 +1,6 @@
 # Basic TN3270 Display Emulator Changelog
 
-## `2.18.5`
+## `2.18.6`
 - Bugfix: Do not log prompt value in debug mode [#108](https://github.com/zowe/tn3270-ng2/pull/108)
 
 ## `2.18.2`
