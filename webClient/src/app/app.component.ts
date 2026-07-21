@@ -132,9 +132,9 @@ export class AppComponent implements AfterViewInit {
 
     //defaulting initializations
     if (!this.host) this.host = "localhost";
-    if (!this.port) this.port = 23;
+    if (!this.port) this.port = 992;
     if (!this.modType) this.modType = "1";
-    if (!this.securityType) this.securityType = "telnet";
+    if (!this.securityType) this.securityType = "tls";
     if (!this.row) this.row = 24;
     if (!this.column) this.column = 80;
   }
