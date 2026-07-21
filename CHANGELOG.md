@@ -1,8 +1,9 @@
 # Basic TN3270 Display Emulator Changelog
 
 ## `3.6.0`
-- Bugfix: if unknown security options is specified, fallback to `tls` [#109](https://github.com/zowe/tn3270-ng2/pull/109)
-- Bugfix: Do not log prompt value in debug mode [#107](https://github.com/zowe/tn3270-ng2/pull/107)
+- Bugfix: if unknown security options is specified, fallback to `tls` ([#109](https://github.com/zowe/tn3270-ng2/pull/109))
+- Bugfix: Do not log prompt value in debug mode ([#107](https://github.com/zowe/tn3270-ng2/pull/107))
+- Bugfix: Default to port 992, tls ([#111](https://github.com/zowe/tn3270-ng2/pull/111))
 
 ## `3.3.0`
 - Enhancement: LU name is displayed in the windows title [#101](https://github.com/zowe/tn3270-ng2/pull/101)
