@@ -3,6 +3,8 @@
 ## `3.6.0`
 - Bugfix: if unknown security options is specified, fallback to `tls` [#109](https://github.com/zowe/tn3270-ng2/pull/109)
 - Bugfix: Do not log prompt value in debug mode [#107](https://github.com/zowe/tn3270-ng2/pull/107)
+- Enhancement: When the server rejects a connection due to an `allowList` restriction, the status bar now shows "Connection forbidden" instead of a generic websocket error.
+- Enhancement: Default connection settings can now be configured via `components.tn3270-ng2.defaults` in `zowe.yaml` (host, port, security type, device type, screen dimensions, codepage), replacing the need for `ZWED_TN3270_*` environment variables. Env var fallback is preserved.
 
 ## `3.3.0`
 - Enhancement: LU name is displayed in the windows title [#101](https://github.com/zowe/tn3270-ng2/pull/101)
