@@ -104,7 +104,7 @@ export class AppComponent implements AfterViewInit {
     @Optional() @Inject(Angular2InjectionTokens.WINDOW_ACTIONS) private windowActions: Angular2PluginWindowActions,
     @Inject(Angular2InjectionTokens.LAUNCH_METADATA) private launchMetadata: any,
   ) {
-    this.log.info('Recvd launch metadata='+JSON.stringify(launchMetadata));
+    this.log.debug('Recvd launch metadata='+JSON.stringify(launchMetadata));
     if (launchMetadata != null && launchMetadata.data) {
       switch (launchMetadata.data.type) {
       case "connect":
