@@ -1,7 +1,7 @@
 {
   "host": "",
-  "port": 23,
+  "port": 992,
   "security": {
-    "type": "telnet"
+    "type": "tls"
   }
 }

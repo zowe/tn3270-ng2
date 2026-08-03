@@ -111,7 +111,7 @@ export class AppComponent implements AfterViewInit {
     @Optional() @Inject(Angular2InjectionTokens.WINDOW_ACTIONS) private windowActions: Angular2PluginWindowActions,
     @Inject(Angular2InjectionTokens.LAUNCH_METADATA) private launchMetadata: any,
   ) {
-    this.log.info('Recvd launch metadata='+JSON.stringify(launchMetadata));
+    this.log.debug('Recvd launch metadata='+JSON.stringify(launchMetadata));
     if (launchMetadata != null && launchMetadata.data) {
       switch (launchMetadata.data.type) {
       case "connect":
@@ -139,9 +139,9 @@ export class AppComponent implements AfterViewInit {
 
     //defaulting initializations
     if (!this.host) this.host = "localhost";
-    if (!this.port) this.port = 23;
+    if (!this.port) this.port = 992;
     if (!this.modType) this.modType = "1";
-    if (!this.securityType) this.securityType = "telnet";
+    if (!this.securityType) this.securityType = "tls";
     if (!this.row) this.row = 24;
     if (!this.column) this.column = 80;
   }
