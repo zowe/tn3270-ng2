@@ -4,9 +4,9 @@
   This program and the accompanying materials are
   made available under the terms of the Eclipse Public License v2.0 which accompanies
   this distribution, and is available at https://www.eclipse.org/legal/epl-v20.html
-  
+
   SPDX-License-Identifier: EPL-2.0
-  
+
   Copyright Contributors to the Zowe Project.
 */
 import { Subject } from 'rxjs';
@@ -20,8 +20,8 @@ import {catchError} from 'rxjs/operators';
 
 export class TerminalStateHelper {
   private url:string;
-  
-  constructor(public http: HttpClient, 
+
+  constructor(public http: HttpClient,
               public log: ZLUX.ComponentLogger,
              pluginDefinition: any){
     this.url = ZoweZLUX.uriBroker.pluginRESTUri(pluginDefinition.getBasePlugin(), 'stateDiscovery', 'zosDiscovery/system/tn3270');
@@ -31,7 +31,7 @@ export class TerminalStateHelper {
     return this.http.get(luname ? this.url+'?luname='+luname : this.url)
     .pipe(catchError(this.handleError));
   }
-  
+
   handleError(error: any): Observable<void> {
     let errorMsg = error.message || 'Failure to retrieve TN3270/VTAM/TSO data';
 
@@ -68,9 +68,24 @@ export class Terminal {
     const helper:TerminalStateHelper = new TerminalStateHelper(this.http,this.log,this.pluginDefinition);
     let plugin:ZLUX.Plugin = this.pluginDefinition.getBasePlugin();
 
-    connectionSettings.url = ZoweZLUX.uriBroker.pluginWSUri(plugin, 'terminalstream', '');
-    connectionSettings.connect = true;
-    connectionSettings.security.type = connectionSettings.security.type == 'telnet' ? 0 : 2;
+    // Build a fresh, allow-listed object instead of forwarding the caller-supplied connectionSettings verbatim
+    const safeConnectionSettings: any = {
+      host: connectionSettings.host,
+      port: connectionSettings.port,
+      security: {
+        type: connectionSettings.security.type == 'telnet' ? 0 : 2
+      },
+      deviceType: connectionSettings.deviceType,
+      alternateHeight: connectionSettings.alternateHeight,
+      alternateWidth: connectionSettings.alternateWidth,
+      charsetName: connectionSettings.charsetName,
+      sessionDeviceName: connectionSettings.sessionDeviceName,
+      oiaEnabled: connectionSettings.oiaEnabled,
+      enableTN3270E: connectionSettings.enableTN3270E,
+      destructiveBackspace: connectionSettings.destructiveBackspace,
+      url: ZoweZLUX.uriBroker.pluginWSUri(plugin, 'terminalstream', ''),
+      connect: true
+    };
     // logic for using dispatcher goes here
     // should be in Tn3270Service.js eventually
     let latestContext = {};
@@ -97,7 +112,7 @@ export class Terminal {
       this.log.debug("Context callback. screenID="+screenContext.screenID+" x="+x+" y="+y);
       this.log.debug("screenContext combined=" + JSON.stringify(screenContext, null, 2));
       this.contextMenuEmitter.next({ x: x, y: y, screenContext: screenContext});
-      
+
     }
 
     const wsErrorCallback = (wsCode: number, wsReason: string, terminalMessage: string) => {
@@ -107,11 +122,11 @@ export class Terminal {
 
     this.virtualScreen = org_zowe_terminal_tn3270.start3270({parentDiv:this.terminalElement,
                                     width: width, height: height},
-                                   connectionSettings,
+                                   safeConnectionSettings,
                                    null,{contextCallback:contextCallback,
                                          screenLoadedCallback: screenLoadedCallback,
                                          wsErrorCallback: wsErrorCallback});
-    this.virtualScreen.destructiveBackspace = connectionSettings.destructiveBackspace;
+    this.virtualScreen.destructiveBackspace = safeConnectionSettings.destructiveBackspace;
   }
 
   isConnected(): boolean {
@@ -146,9 +161,9 @@ export class Terminal {
   This program and the accompanying materials are
   made available under the terms of the Eclipse Public License v2.0 which accompanies
   this distribution, and is available at https://www.eclipse.org/legal/epl-v20.html
-  
+
   SPDX-License-Identifier: EPL-2.0
-  
+
   Copyright Contributors to the Zowe Project.
 */
 
