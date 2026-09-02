@@ -17,7 +17,7 @@ declare var org_zowe_terminal_tn3270: any;
 import { Angular2InjectionTokens, Angular2PluginWindowActions, Angular2PluginViewportEvents, ContextMenuItem } from 'pluginlib/inject-resources';
 
 import { Terminal, TerminalWebsocketError} from './terminal';
-import { ConfigServiceTerminalConfig, ZssConfig, KeySequencesConfig, KeySequence, Keys } from './terminal.config';
+import { ConfigServiceTerminalConfig, KeySequencesConfig, KeySequence, Keys } from './terminal.config';
 
 import './app.component.css';
 
@@ -358,12 +358,17 @@ export class AppComponent implements AfterViewInit {
   checkZssProxy(): Promise<any> {
     return new Promise((resolve, reject) => {
       if (this.host === "") {
-        this.loadZssSettings().subscribe((zssSettings: ZssConfig) => {
-          this.host = zssSettings.zssServerHostName;
-          resolve(this.host);
-        }, () => {
-          this.setError(ErrorType.host, "Invalid Hostname: \"" + this.host + "\".")
-          reject(this.host)
+        ZoweZLUX.environment.getAgentHost().then((agentHost) => {
+          if (agentHost) {
+            this.host = agentHost;
+            resolve(this.host);
+          } else {
+            this.setError(ErrorType.host, "Invalid Hostname: \"" + this.host + "\".");
+            reject(this.host);
+          }
+        }).catch(() => {
+          this.setError(ErrorType.host, "Invalid Hostname: \"" + this.host + "\".");
+          reject(this.host);
         });
       } else {
         resolve(this.host);
@@ -590,10 +595,6 @@ export class AppComponent implements AfterViewInit {
   loadConfig(): Observable<ConfigServiceTerminalConfig> {
     this.log.warn("Config load is wrong and not abstracted");
     return this.http.get<ConfigServiceTerminalConfig>(ZoweZLUX.uriBroker.pluginConfigForScopeUri(this.pluginDefinition.getBasePlugin(),'user','sessions','_defaultTN3270.json'))
-  }
-
-  loadZssSettings(): Observable<ZssConfig> {
-    return this.http.get<ZssConfig>(ZoweZLUX.uriBroker.serverRootUri("server/proxies"))
   }
 
   saveSettings() {
