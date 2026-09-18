@@ -249,7 +249,12 @@ export class AppComponent implements AfterViewInit {
   }
 
   private onWSError(error: TerminalWebsocketError): void {
-    let message = "Terminal closed due to websocket error. Code="+error.code;
+    let message: string;
+    if (error.code === 4003) {
+      message = "Connection forbidden: host not permitted by server allowList";
+    } else {
+      message = "Terminal closed due to websocket error. Code="+error.code;
+    }
     this.log.warn(message+", Reason="+error.reason);
     this.setError(ErrorType.websocket, message);
     this.disconnectAndUnsetTitle();
