@@ -163,6 +163,7 @@ jobs:
         uses: zowe-actions/zlux-builds/plugins/zlux-plugins@v3.x/main
         with:
           build-zss: false
+          clone-v2: true
 
       - name: '[Prep 8] packaging'
         uses: zowe-actions/zlux-builds/plugins/make-pax@v3.x/main
