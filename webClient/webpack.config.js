@@ -25,6 +25,7 @@ try {
 
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const CompressionPlugin = require('compression-webpack-plugin');
+const TerserPlugin = require('terser-webpack-plugin');
 const AotPlugin = require('@ngtools/webpack').AngularWebpackPlugin;
 
 const config = {
@@ -66,7 +67,8 @@ const config = {
     }),
     new CompressionPlugin({
       threshold: 100000,
-      minRatio: 0.8
+      minRatio: 0.8,
+      deleteOriginalAssets: true
     }),
     new AotPlugin({
       tsConfigPath: './tsconfig.json',
@@ -92,6 +94,18 @@ function deepMerge(base, extension) {
 function isObject(item) {
   return (item && typeof item === 'object' && !Array.isArray(item));
 }
+
+config.optimization = {
+  minimizer: [
+    new TerserPlugin({
+      extractComments: {
+        condition: /^\**!|@preserve|@license|@cc_on/i,
+        filename: 'ATTRIBUTION.txt',
+        banner: false
+      }
+    })
+  ]
+};
 
 module.exports = deepMerge(baseConfig, config);
 
