@@ -44,14 +44,6 @@ export class ConfigServiceTerminalConfig {
   }
 }
 
-export class ZssConfig {
-  constructor(
-    public zssServerHostName: string,
-    public zssPort: string
-  ) {
-  }
-}
-
 export class Keys {
   constructor(
     public normal?: string,

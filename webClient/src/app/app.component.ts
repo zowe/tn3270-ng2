@@ -17,7 +17,7 @@ declare var org_zowe_terminal_tn3270: any;
 import { Angular2InjectionTokens, Angular2PluginWindowActions, Angular2PluginViewportEvents, ContextMenuItem } from 'pluginlib/inject-resources';
 
 import { Terminal, TerminalWebsocketError} from './terminal';
-import { ConfigServiceTerminalConfig, ZssConfig, KeySequencesConfig, KeySequence, Keys } from './terminal.config';
+import { ConfigServiceTerminalConfig, KeySequencesConfig, KeySequence, Keys } from './terminal.config';
 
 import './app.component.css';
 
@@ -111,7 +111,7 @@ export class AppComponent implements AfterViewInit {
     @Optional() @Inject(Angular2InjectionTokens.WINDOW_ACTIONS) private windowActions: Angular2PluginWindowActions,
     @Inject(Angular2InjectionTokens.LAUNCH_METADATA) private launchMetadata: any,
   ) {
-    this.log.info('Recvd launch metadata='+JSON.stringify(launchMetadata));
+    this.log.debug('Recvd launch metadata='+JSON.stringify(launchMetadata));
     if (launchMetadata != null && launchMetadata.data) {
       switch (launchMetadata.data.type) {
       case "connect":
@@ -139,9 +139,9 @@ export class AppComponent implements AfterViewInit {
 
     //defaulting initializations
     if (!this.host) this.host = "localhost";
-    if (!this.port) this.port = 23;
+    if (!this.port) this.port = 992;
     if (!this.modType) this.modType = "1";
-    if (!this.securityType) this.securityType = "telnet";
+    if (!this.securityType) this.securityType = "tls";
     if (!this.row) this.row = 24;
     if (!this.column) this.column = 80;
   }
@@ -249,7 +249,12 @@ export class AppComponent implements AfterViewInit {
   }
 
   private onWSError(error: TerminalWebsocketError): void {
-    let message = "Terminal closed due to websocket error. Code="+error.code;
+    let message: string;
+    if (error.code === 4003) {
+      message = "Connection forbidden: host not permitted by server allowList";
+    } else {
+      message = "Terminal closed due to websocket error. Code="+error.code;
+    }
     this.log.warn(message+", Reason="+error.reason);
     this.setError(ErrorType.websocket, message);
     this.disconnectAndUnsetTitle();
@@ -358,12 +363,17 @@ export class AppComponent implements AfterViewInit {
   checkZssProxy(): Promise<any> {
     return new Promise((resolve, reject) => {
       if (this.host === "") {
-        this.loadZssSettings().subscribe((zssSettings: ZssConfig) => {
-          this.host = zssSettings.zssServerHostName;
-          resolve(this.host);
-        }, () => {
-          this.setError(ErrorType.host, "Invalid Hostname: \"" + this.host + "\".")
-          reject(this.host)
+        ZoweZLUX.environment.getAgentHost().then((agentHost) => {
+          if (agentHost) {
+            this.host = agentHost;
+            resolve(this.host);
+          } else {
+            this.setError(ErrorType.host, "Invalid Hostname: \"" + this.host + "\".");
+            reject(this.host);
+          }
+        }).catch(() => {
+          this.setError(ErrorType.host, "Invalid Hostname: \"" + this.host + "\".");
+          reject(this.host);
         });
       } else {
         resolve(this.host);
@@ -424,7 +434,7 @@ export class AppComponent implements AfterViewInit {
     if (keys.prompt) {
       this.keySequncesLogDebug(keys);
       const promptValue = prompt(keys.prompt, '');
-      this.log.debug(`Value: ${promptValue}`);
+      this.log.debug(`Prompt value of length ${promptValue.length}`);
       for (let char = 0; char < promptValue.length; char++) {
         textAreaElement.dispatchEvent(new KeyboardEvent('keydown', {'key': promptValue[char]}));
       }
@@ -590,10 +600,6 @@ export class AppComponent implements AfterViewInit {
   loadConfig(): Observable<ConfigServiceTerminalConfig> {
     this.log.warn("Config load is wrong and not abstracted");
     return this.http.get<ConfigServiceTerminalConfig>(ZoweZLUX.uriBroker.pluginConfigForScopeUri(this.pluginDefinition.getBasePlugin(),'user','sessions','_defaultTN3270.json'))
-  }
-
-  loadZssSettings(): Observable<ZssConfig> {
-    return this.http.get<ZssConfig>(ZoweZLUX.uriBroker.serverRootUri("server/proxies"))
   }
 
   saveSettings() {
