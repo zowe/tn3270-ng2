@@ -1,7 +1,7 @@
 # Basic TN3270 Display Emulator Changelog
 
 ## Recent Changes
-- Bugfix: Ignore `security.badCert` in connection settings so that callers cannot disable TLS certificate validation on the terminal proxy
+- Bugfix: Ignore `security.badCert` in connection settings so that callers cannot disable TLS certificate validation on the terminal proxy ([#119](https://github.com/zowe/tn3270-ng2/pull/119))
 
 ## `3.6.0`
 - Bugfix: if unknown security options is specified, fallback to `tls` ([#109](https://github.com/zowe/tn3270-ng2/pull/109))
