@@ -70,6 +70,9 @@ export class Terminal {
 
     connectionSettings.url = ZoweZLUX.uriBroker.pluginWSUri(plugin, 'terminalstream', '');
     connectionSettings.connect = true;
+    connectionSettings.security = connectionSettings.security || {};
+    // Never let callers (e.g. launch metadata) disable TLS certificate validation on the proxy
+    delete connectionSettings.security.badCert;
     connectionSettings.security.type = connectionSettings.security.type == 'telnet' ? 0 : 2;
     // logic for using dispatcher goes here
     // should be in Tn3270Service.js eventually
