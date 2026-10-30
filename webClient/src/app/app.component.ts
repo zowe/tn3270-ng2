@@ -251,7 +251,7 @@ export class AppComponent implements AfterViewInit {
   private onWSError(error: TerminalWebsocketError): void {
     let message: string;
     if (error.code === 4003) {
-      message = "Connection forbidden: host not permitted by server allowList";
+      message = "Connection forbidden: host not permitted by server allowList or allowPorts";
     } else {
       message = "Terminal closed due to websocket error. Code="+error.code;
     }
