@@ -45,11 +45,18 @@ export type TerminalWebsocketError = {
   terminalMessage: string;
 }
 
+export type CertCheckEvent = {
+  host: string;
+  fingerprint: string;
+  replyFn: (fp: string, accepted: boolean) => void;
+}
+
 export class Terminal {
   virtualScreen: any;
   luname: string;
   contextMenuEmitter: Subject<any> = new Subject();
   wsErrorEmitter: Subject<TerminalWebsocketError> = new Subject();
+  certCheckEmitter: Subject<CertCheckEvent> = new Subject();
   constructor(
     private terminalElement: HTMLElement,
     private terminalParentElement: HTMLElement,
@@ -71,6 +78,11 @@ export class Terminal {
     connectionSettings.url = ZoweZLUX.uriBroker.pluginWSUri(plugin, 'terminalstream', '');
     connectionSettings.connect = true;
     connectionSettings.security.type = connectionSettings.security.type == 'telnet' ? 0 : 2;
+    if (connectionSettings.security.type !== 0) {
+      // Enable TLS certificate prompting (SECURITY_BAD_CERTIFICATE_PROMPT=1)
+      // Without this, rejectUnauthorized=false and checkServerIdentity is never called
+      connectionSettings.security.badCert = 1;
+    }
     // logic for using dispatcher goes here
     // should be in Tn3270Service.js eventually
     let latestContext = {};
@@ -105,12 +117,17 @@ export class Terminal {
       this.wsErrorEmitter.next({code: wsCode, reason: wsReason, terminalMessage: terminalMessage});
     };
 
+    const certCheckCallback = (host: string, fingerprint: string, replyFn: (fp: string, accepted: boolean) => void) => {
+      this.certCheckEmitter.next({ host, fingerprint, replyFn });
+    };
+
     this.virtualScreen = org_zowe_terminal_tn3270.start3270({parentDiv:this.terminalElement,
                                     width: width, height: height},
                                    connectionSettings,
                                    null,{contextCallback:contextCallback,
                                          screenLoadedCallback: screenLoadedCallback,
-                                         wsErrorCallback: wsErrorCallback});
+                                         wsErrorCallback: wsErrorCallback,
+                                         certificateCheck: certCheckCallback});
     this.virtualScreen.destructiveBackspace = connectionSettings.destructiveBackspace;
   }
 

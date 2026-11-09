@@ -136,6 +136,90 @@
   background: darkgray;
 }
 
+.cert-dialog-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.cert-dialog {
+  background: #2a2a2a;
+  color: #e0e0e0;
+  border: 1px solid #555;
+  border-radius: 6px;
+  padding: 20px 24px;
+  max-width: 520px;
+  width: 90%;
+  font-family: monospace;
+}
+
+.cert-dialog-warning {
+  color: #f5a623;
+  font-weight: bold;
+  margin-bottom: 12px;
+  font-family: sans-serif;
+}
+
+.cert-dialog-title {
+  font-size: 16px;
+  font-weight: bold;
+  margin-bottom: 12px;
+  font-family: sans-serif;
+}
+
+.cert-dialog-row {
+  margin-bottom: 4px;
+  font-family: sans-serif;
+  font-size: 13px;
+}
+
+.cert-dialog-fp {
+  background: #1a1a1a;
+  border: 1px solid #444;
+  border-radius: 3px;
+  padding: 6px 8px;
+  font-size: 11px;
+  word-break: break-all;
+  margin: 8px 0 16px 0;
+  color: #aed6f1;
+}
+
+.cert-dialog-buttons {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.cert-btn {
+  padding: 6px 14px;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.cert-btn-reject {
+  background: #bf3030;
+  color: white;
+}
+
+.cert-btn-once {
+  background: #555;
+  color: white;
+}
+
+.cert-btn-permanent {
+  background: #17863a;
+  color: white;
+}
+
 /*
   This program and the accompanying materials are
   made available under the terms of the Eclipse Public License v2.0 which accompanies

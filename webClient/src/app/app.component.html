@@ -116,6 +116,24 @@
       </div>
     </div>
   }
+  @if (showCertDialog && pendingCert) {
+    <div class="cert-dialog-overlay">
+      <div class="cert-dialog">
+        @if (certHostChanged) {
+          <div class="cert-dialog-warning">&#9888; WARNING: The certificate for this host has changed. This may indicate a security issue.</div>
+        }
+        <div class="cert-dialog-title">TLS Certificate Verification</div>
+        <div class="cert-dialog-row">Host: <strong>{{pendingCert.host}}:{{pendingCert.port}}</strong></div>
+        <div class="cert-dialog-row">SHA-256 Fingerprint:</div>
+        <div class="cert-dialog-fp">{{pendingCert.fingerprint}}</div>
+        <div class="cert-dialog-buttons">
+          <button class="cert-btn cert-btn-reject" (click)="rejectCert()">Reject</button>
+          <button class="cert-btn cert-btn-once" (click)="acceptCertOnce()">Trust Once</button>
+          <button class="cert-btn cert-btn-permanent" (click)="acceptCertPermanently()">Trust Permanently</button>
+        </div>
+      </div>
+    </div>
+  }
   <div class="tn3270" [ngStyle]="terminalDivStyle" #terminal>
   </div>  
 </div>

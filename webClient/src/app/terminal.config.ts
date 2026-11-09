@@ -78,6 +78,18 @@ export class KeySequencesConfig {
   }
 }
 
+export interface KnownHostEntry {
+  fingerprint: string;
+  addedAt: string;
+  type: 'tls';
+}
+
+export interface KnownHostsConfig {
+  _objectType: string;
+  _metadataVersion: string;
+  contents: { [hostPort: string]: KnownHostEntry };
+}
+
 /*
   This program and the accompanying materials are
   made available under the terms of the Eclipse Public License v2.0 which accompanies
