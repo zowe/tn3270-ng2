@@ -27,7 +27,7 @@ jobs:
     steps:
       # this action will fail the whole workflow if permission check fails
       - name: check permission
-        uses: zowe-actions/shared-actions/permission-check@main
+        uses: zowe-actions/shared-actions/permission-check@77d7d9b50e60fedc8132b5e5eb6d611c4e483416 # main
         with:
           user: ${{ github.actor }}
           github-repo: ${{ github.repository }}
@@ -126,7 +126,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: '[Prep 2] Validate package.json'
-        uses: zowe-actions/shared-actions/validate-package-json@main
+        uses: zowe-actions/shared-actions/validate-package-json@77d7d9b50e60fedc8132b5e5eb6d611c4e483416 # main
 
       - name: '[Prep 3] Cache node modules'
         uses: actions/cache@v4
@@ -145,12 +145,12 @@ jobs:
           node-version: 22.12.0
 
       - name: '[Prep 5] Setup jFrog CLI'
-        uses: jfrog/setup-jfrog-cli@v2
+        uses: jfrog/setup-jfrog-cli@11ee3f9bb82595485cb55670e4f93885080e183b # v2
         env:
           JF_ARTIFACTORY_1: ${{ secrets.JF_ARTIFACTORY_TOKEN }}
 
       - name: '[Prep 6] prepare workflow'
-        uses: zowe-actions/zlux-builds/plugins/prepare-workflow@v3.x/main
+        uses: zowe-actions/zlux-builds/plugins/prepare-workflow@45cd8dc50de64566783bd0f69ea8ae6de830d69a # v3.x/main
         with:
           github-user: ${{ secrets.ZOWE_ROBOT_USER }}
           github-password: ${{ secrets.ZOWE_ROBOT_TOKEN }}
@@ -160,22 +160,22 @@ jobs:
           plugin-version: ${{ github.event.inputs.BUILD_VERSION }}
 
       - name: '[Prep 7] build'
-        uses: zowe-actions/zlux-builds/plugins/zlux-plugins@v3.x/main
+        uses: zowe-actions/zlux-builds/plugins/zlux-plugins@45cd8dc50de64566783bd0f69ea8ae6de830d69a # v3.x/main
         with:
           build-zss: false
 
       - name: '[Prep 8] packaging'
-        uses: zowe-actions/zlux-builds/plugins/make-pax@v3.x/main
+        uses: zowe-actions/zlux-builds/plugins/make-pax@45cd8dc50de64566783bd0f69ea8ae6de830d69a # v3.x/main
         with:
           pax-ssh-username: ${{ secrets.SSH_MARIST_USERNAME }}
           pax-ssh-password: ${{ secrets.SSH_MARIST_RACF_PASSWORD }}
           pax-name: tn3270-ng2
 
       - name: '[Prep 9] deploy '
-        uses: zowe-actions/zlux-builds/plugins/deploy-pax@v3.x/main
+        uses: zowe-actions/zlux-builds/plugins/deploy-pax@45cd8dc50de64566783bd0f69ea8ae6de830d69a # v3.x/main
         
       - name: '[Prep 10] Bump Staging Version '
         if: ${{ github.event.inputs.PERFORM_RELEASE == 'true' && env.RELEASE == 'true' }}
-        uses: zowe-actions/zlux-builds/plugins/bump-version@v3.x/main
+        uses: zowe-actions/zlux-builds/plugins/bump-version@45cd8dc50de64566783bd0f69ea8ae6de830d69a # v3.x/main
         env: 
          GITHUB_TOKEN: ${{ secrets.ZOWE_ROBOT_TOKEN }}
